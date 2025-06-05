@@ -1,22 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config(); // ✅ Load environment variables
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/landRegistryDB', {
+// Connect to MongoDB Atlas using .env variable
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
-  console.log('✅ MongoDB Connected');
+  console.log('✅ MongoDB Connected to Atlas');
 }).catch(err => {
-  console.log('❌ DB Connection Error:', err);
+  console.error('❌ MongoDB Connection Error:', err);
 });
 
 // Routes
@@ -26,7 +27,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/messages', require('./routes/chatRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 
-
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
