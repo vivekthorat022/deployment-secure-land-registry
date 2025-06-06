@@ -68,6 +68,48 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// ✅ GET /api/profile/:userId
+router.get('/profile/:userId', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const { fullName, email, phone, isApproved, walletAddress, state, city, pincode } = user;
+        res.status(200).json({ fullName, email, phone, isApproved, walletAddress, state, city, pincode });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ✅ PUT /api/profile/:userId
+router.put('/profile/:userId', async (req, res) => {
+    try {
+        const updates = (({
+            phone,
+            walletAddress,
+            state,
+            city,
+            pincode
+        }) => ({ phone, walletAddress, state, city, pincode }))(req.body);
+
+        const user = await User.findByIdAndUpdate(
+            req.params.userId,
+            { $set: updates },
+            { new: true }
+        );
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const { fullName, email, isApproved } = user;
+        res.status(200).json({ fullName, email, ...updates, isApproved });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // PUT /api/admin/approve/:userId
 router.put('/admin/approve/:userId', async (req, res) => {
     try {

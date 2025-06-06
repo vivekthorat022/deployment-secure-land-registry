@@ -1,25 +1,65 @@
 import React, { useContext, useEffect, useState } from "react";
 import { WalletContext } from "../context/WalletContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 import Layout from "../components/Layout";
 
 const Profile = () => {
   const { walletAddress } = useContext(WalletContext);
   const [user, setUser] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    // 🔁 Simulated user info fetch — replace with actual API call later
     const fetchUserInfo = async () => {
-      const dummyUser = {
-        fullName: "Vivek Sharma",
-        email: "vivek@example.com",
-        phone: "+91-9876543210",
-      };
-      setUser(dummyUser);
+      try {
+        const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/profile/${userId}`);
+        const data = await res.json();
+        setUser(data);
+        setFormData(data);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
     };
 
-    fetchUserInfo();
-  }, []);
+    if (userId) {
+      fetchUserInfo();
+    }
+  }, [userId]);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/profile/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data);
+        setEditMode(false);
+        alert("✅ Profile updated successfully");
+      } else {
+        alert("❌ " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Server error");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    window.location.href = "/login";
+  };
 
   return (
     <Layout>
@@ -38,20 +78,59 @@ const Profile = () => {
                   <strong>Email:</strong> {user.email}
                 </div>
                 <div>
-                  <strong>Phone:</strong> {user.phone}
+                  <strong>Approval Status:</strong>{" "}
+                  {user.isApproved ? (
+                    <span className="text-green-600">✅ Approved</span>
+                  ) : (
+                    <span className="text-red-500">⏳ Pending</span>
+                  )}
                 </div>
+
+                {editMode ? (
+                  <>
+                    <div>
+                      <label>Phone:</label>
+                      <Input name="phone" value={formData.phone || ""} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label>Wallet Address:</label>
+                      <Input name="walletAddress" value={formData.walletAddress || ""} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label>State:</label>
+                      <Input name="state" value={formData.state || ""} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label>City:</label>
+                      <Input name="city" value={formData.city || ""} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label>Pincode:</label>
+                      <Input name="pincode" value={formData.pincode || ""} onChange={handleChange} />
+                    </div>
+                    <div className="flex gap-4 mt-4">
+                      <Button onClick={handleSave}>💾 Save</Button>
+                      <Button variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div><strong>Phone:</strong> {user.phone || "-"}</div>
+                    <div><strong>Wallet:</strong> {user.walletAddress || "-"}</div>
+                    <div><strong>State:</strong> {user.state || "-"}</div>
+                    <div><strong>City:</strong> {user.city || "-"}</div>
+                    <div><strong>Pincode:</strong> {user.pincode || "-"}</div>
+                    <Button className="mt-4" onClick={() => setEditMode(true)}>✏️ Edit Profile</Button>
+                  </>
+                )}
+
+                <Button className="w-full mt-4 bg-red-500 hover:bg-red-600" onClick={handleLogout}>
+                  🚪 Logout
+                </Button>
               </>
             ) : (
               <p>Loading user info...</p>
             )}
-            <div>
-              <strong>Connected Wallet:</strong>{" "}
-              {walletAddress ? (
-                <span className="text-green-600 font-mono">{walletAddress}</span>
-              ) : (
-                <span className="text-red-500">Not Connected</span>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>

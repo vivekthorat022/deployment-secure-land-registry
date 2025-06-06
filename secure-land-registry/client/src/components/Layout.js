@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Footer from "../components/Footer"; // ✅ Import the new Footer
+import Footer from "../components/Footer";
 
 const Layout = ({ children }) => {
   return (
@@ -10,7 +10,6 @@ const Layout = ({ children }) => {
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/list-land" className="hover:underline">List Land</Link>
           <Link to="/profile" className="hover:underline">Profile</Link>
-          <Link to="/admin/users" className="hover:underline">Admin</Link>
         </nav>
       </header>
 
