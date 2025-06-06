@@ -14,6 +14,7 @@ const Layout = ({ children }) => {
         <nav className="space-x-6 text-gray-700 font-medium">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/lands" className="hover:underline">Available Lands</Link>
+          <Link to="/login" className="hover:underline">Login</Link>
           <Link to="/list-land" className="hover:underline">List Your Land</Link>
           <Link to="/about" className="hover:underline">About</Link>
         </nav>
