@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-// import { Select } from "../components/ui/select";
 import toast from "react-hot-toast";
 
 const ListOfLands = () => {
@@ -23,6 +22,7 @@ const ListOfLands = () => {
 
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
 
   const fetchLands = async () => {
     setLoading(true);
@@ -156,15 +156,22 @@ const ListOfLands = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {filteredLands.map((land) => (
-              <Card key={land._id} className="bg-white shadow-md hover:shadow-xl transition-shadow">
-                <CardHeader>
+              <Card key={land._id} className="relative bg-white shadow-md hover:shadow-xl transition-shadow border border-gray-200 rounded-lg overflow-hidden">
+                {/* Your Listing Badge */}
+                {land.user === userId && (
+                  <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
+                    Your Listing
+                  </span>
+                )}
+
+                <CardHeader className="p-0">
                   <img
                     src={land.images[0] || "https://via.placeholder.com/300x200"}
                     alt={land.title}
-                    className="w-full h-48 object-cover rounded"
+                    className="w-full h-48 object-cover"
                   />
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4">
                   <CardTitle className="text-lg font-semibold mb-1">{land.title}</CardTitle>
                   <p className="text-sm text-gray-600 mb-1">{land.description}</p>
                   <p className="text-sm text-gray-500 mb-1">
