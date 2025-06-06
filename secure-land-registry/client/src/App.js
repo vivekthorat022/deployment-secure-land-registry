@@ -8,6 +8,8 @@ import LandDetails from "./pages/LandDetails";
 import LandInquiryPage from "./pages/LandInquiryPage";
 import ChatPage from "./pages/ChatPage";
 import TransactionHistory from "./pages/TransactionHistory";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 function App() {
   return (
