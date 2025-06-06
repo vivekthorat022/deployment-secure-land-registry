@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-// import io from "socket.io-client";
 
 // Updated API https://land-registry-backend-h86i.onrender.com/api/
-// const socket = io("http://localhost:5000"); // adjust if server URL is different
-// const socket = io("https://land-registry-backend-h86i.onrender.com"); // adjust if server URL is different
 
 const ChatBox = ({ senderId, receiverId }) => {
   const [messages, setMessages] = useState([]);
@@ -14,7 +11,6 @@ const ChatBox = ({ senderId, receiverId }) => {
     // Fetch existing messages
     const fetchMessages = async () => {
       try {
-        // const res = await fetch("http://localhost:5000/api/chats", {
         const res = await fetch("https://land-registry-backend-h86i.onrender.com/api/chats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -28,15 +24,6 @@ const ChatBox = ({ senderId, receiverId }) => {
     };
 
     fetchMessages();
-    socket.emit("joinRoom", { senderId, receiverId });
-
-    socket.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
   }, [senderId, receiverId]);
 
   useEffect(() => {
@@ -52,12 +39,10 @@ const ChatBox = ({ senderId, receiverId }) => {
       message: text
     };
 
-    socket.emit("sendMessage", msg);
     setMessages((prev) => [...prev, msg]);
     setText("");
 
     try {
-      // await fetch("http://localhost:5000/api/chats/send", {
       await fetch("https://land-registry-backend-h86i.onrender.com/api/chats/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
