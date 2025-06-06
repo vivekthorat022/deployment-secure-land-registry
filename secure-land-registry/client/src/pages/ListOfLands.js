@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Select } from "../components/ui/select";
+// import { Select } from "../components/ui/select";
 import toast from "react-hot-toast";
 
 const ListOfLands = () => {
