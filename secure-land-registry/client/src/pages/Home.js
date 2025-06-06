@@ -1,34 +1,43 @@
-import { useContext } from "react";
-import { WalletContext } from "../context/WalletContext";
-import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 import Layout from "../components/Layout";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 
 function Home() {
-  const { walletAddress, connectWallet } = useContext(WalletContext);
-
   return (
     <Layout>
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-md rounded-xl bg-white text-black">
+      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-12">
+        {/* Big welcome card */}
+        <Card className="w-full max-w-3xl bg-white shadow-lg p-6 text-center">
           <CardHeader>
-            <CardTitle className="text-center text-2xl font-semibold">Connect Your Wallet</CardTitle>
+            <CardTitle className="text-3xl font-bold text-blue-600">
+              Welcome to the Secure Land Registry Platform
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            {walletAddress ? (
-              <p className="mb-4 text-green-700 text-center">
-                ✅ Connected: <strong>{walletAddress}</strong>
-              </p>
-            ) : (
-              <p className="mb-4 text-gray-700 text-center">
-                Please connect your MetaMask wallet to continue.
-              </p>
-            )}
-            <Button className="w-full" onClick={connectWallet}>
-              {walletAddress ? "Wallet Connected" : "Connect Wallet"}
-            </Button>
+          <CardContent className="text-lg text-gray-700">
+            Your one-stop solution for secure, transparent and efficient land transactions using blockchain technology.
           </CardContent>
         </Card>
+
+        {/* Three small feature cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+          <Card className="p-4 shadow-md bg-white">
+            <CardTitle className="text-lg font-semibold mb-2">🔗 Decentralized</CardTitle>
+            <CardContent className="text-gray-600">
+              Eliminates single points of failure with a blockchain-based approach.
+            </CardContent>
+          </Card>
+          <Card className="p-4 shadow-md bg-white">
+            <CardTitle className="text-lg font-semibold mb-2">🔒 Secure</CardTitle>
+            <CardContent className="text-gray-600">
+              Ensures land record authenticity with immutable smart contracts.
+            </CardContent>
+          </Card>
+          <Card className="p-4 shadow-md bg-white">
+            <CardTitle className="text-lg font-semibold mb-2">👁️ Transparent</CardTitle>
+            <CardContent className="text-gray-600">
+              Enables public ledger visibility, reducing fraudulent transactions.
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </Layout>
   );
