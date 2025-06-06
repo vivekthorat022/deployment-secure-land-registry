@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -18,29 +18,60 @@ const ListYourLand = () => {
     availableFor: "",
     price: "",
     size: "",
-    image: "",
+    images: [],
     contactName: "",
     contactPhone: "",
     contactEmail: ""
   });
+
+  const [imageFiles, setImageFiles] = useState([]);
+
+  const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    if (!userId) {
+      toast.error("❌ User not logged in");
+    }
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+  };
+
+  const convertImagesToBase64 = async (files) => {
+    const base64List = await Promise.all(
+      files.map(
+        (file) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (err) => reject(err);
+          })
+      )
+    );
+    return base64List;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // const response = await fetch("http://localhost:5000/api/lands", {
-        const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
+      const base64Images = await convertImagesToBase64(imageFiles);
+
+      const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          userId: "665b72e4dfd31beab8c2f456", // 🔁 Replace with dynamic ID later
+          userId,
           title: formData.title,
           description: formData.description,
           type: formData.type,
@@ -53,7 +84,7 @@ const ListYourLand = () => {
           availableFor: formData.availableFor,
           price: Number(formData.price),
           size: Number(formData.size),
-          images: [formData.image],
+          images: base64Images,
           contactName: formData.contactName,
           contactPhone: formData.contactPhone,
           contactEmail: formData.contactEmail
@@ -75,17 +106,18 @@ const ListYourLand = () => {
           availableFor: "",
           price: "",
           size: "",
-          image: "",
+          images: [],
           contactName: "",
           contactPhone: "",
           contactEmail: ""
         });
+        setImageFiles([]);
       } else {
         toast.error("❌ " + (data.error || "Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error("❌ Server error");
+      toast.error("❌ Failed to process images");
     }
   };
 
@@ -139,8 +171,8 @@ const ListYourLand = () => {
                 <Input name="size" value={formData.size} onChange={handleChange} type="number" required />
               </div>
               <div className="md:col-span-2">
-                <Label>Image URL</Label>
-                <Input name="image" value={formData.image} onChange={handleChange} placeholder="https://example.com/image.jpg" />
+                <Label>Upload Land Images (jpg, jpeg, png)</Label>
+                <Input type="file" accept="image/png, image/jpeg" multiple onChange={handleImageChange} />
               </div>
               <div>
                 <Label>Contact Name</Label>
