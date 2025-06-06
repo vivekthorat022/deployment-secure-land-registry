@@ -3,7 +3,7 @@ import { Dialog } from "@headlessui/react";
 import { Button } from "./ui/button";
 
 const LandDetailsModal = ({ isOpen, onClose, land, onEnquire }) => {
-  if (!land) return null;
+  if (!isOpen || !land) return null;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
@@ -14,14 +14,22 @@ const LandDetailsModal = ({ isOpen, onClose, land, onEnquire }) => {
 
           {/* Images */}
           <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto">
-            {land.images.map((img, idx) => (
+            {Array.isArray(land.images) && land.images.length > 0 ? (
+              land.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img || "https://placehold.co/300x200?text=No+Image"}
+                  alt={`Land ${idx}`}
+                  className="w-40 h-28 object-cover rounded border"
+                />
+              ))
+            ) : (
               <img
-                key={idx}
-                src={img}
-                alt={`Land ${idx}`}
+                src="https://placehold.co/300x200?text=No+Image"
+                alt="No images"
                 className="w-40 h-28 object-cover rounded border"
               />
-            ))}
+            )}
           </div>
 
           {/* Land Info */}
