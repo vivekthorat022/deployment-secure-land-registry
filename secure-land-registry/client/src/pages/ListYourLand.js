@@ -19,19 +19,19 @@ const ListYourLand = () => {
     availableFor: "",
     price: "",
     size: "",
+    images: [],
     contactName: "",
     contactPhone: "",
     contactEmail: ""
   });
 
   const [imageFiles, setImageFiles] = useState([]);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    if (!userId) {
-      toast.error("❌ User not logged in");
-    }
+    if (!userId) toast.error("❌ User not logged in");
   }, [userId]);
 
   const handleChange = (e) => {
@@ -41,11 +41,7 @@ const ListYourLand = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImageFiles((prev) => [...prev, ...files]);
-  };
-
-  const handleRemoveImage = (index) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImageFiles(files);
   };
 
   const convertImagesToBase64 = async (files) => {
@@ -63,81 +59,13 @@ const ListYourLand = () => {
     return base64List;
   };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     const base64Images = await convertImagesToBase64(imageFiles);
-
-  //     const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         userId,
-  //         title: formData.title,
-  //         description: formData.description,
-  //         type: formData.type,
-  //         location: {
-  //           state: formData.state,
-  //           district: formData.district,
-  //           city: formData.city,
-  //           pincode: formData.pincode
-  //         },
-  //         availableFor: formData.availableFor,
-  //         price: Number(formData.price),
-  //         size: Number(formData.size),
-  //         images: base64Images,
-  //         contactName: formData.contactName,
-  //         contactPhone: formData.contactPhone,
-  //         contactEmail: formData.contactEmail
-  //       })
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       toast.success("✅ Land listing submitted successfully!");
-  //       setFormData({
-  //         title: "",
-  //         description: "",
-  //         type: "",
-  //         state: "",
-  //         district: "",
-  //         city: "",
-  //         pincode: "",
-  //         availableFor: "",
-  //         price: "",
-  //         size: "",
-  //         contactName: "",
-  //         contactPhone: "",
-  //         contactEmail: ""
-  //       });
-  //       setImageFiles([]);
-  //       setIsPreviewOpen(false);
-  //     } else {
-  //       toast.error("❌ " + (data.error || "Something went wrong"));
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("❌ Failed to process images");
-  //   }
-  // };
-
-  // Modified Code for Preview Modal Submission Starts here : 
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsPreviewOpen(true);
-  };
-
-  const submitFinalListing = async () => {
+  const handleFinalSubmit = async () => {
     try {
       const base64Images = await convertImagesToBase64(imageFiles);
 
       const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
           title: formData.title,
@@ -180,19 +108,20 @@ const ListYourLand = () => {
           contactEmail: ""
         });
         setImageFiles([]);
-        setIsPreviewOpen(false);
+        setShowPreview(false);
       } else {
         toast.error("❌ " + (data.error || "Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error("❌ Failed to process images");
+      toast.error("❌ Failed to submit land listing");
     }
   };
 
-
-
-  // Modified Code for Preview Modal Submission Ends here : 
+  const handlePreview = (e) => {
+    e.preventDefault();
+    setShowPreview(true);
+  };
 
   return (
     <Layout>
@@ -202,25 +131,18 @@ const ListYourLand = () => {
             <CardTitle className="text-2xl">📋 List Your Land</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={(e) => { e.preventDefault(); setIsPreviewOpen(true); }}>
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handlePreview}>
               <div>
                 <Label>Title</Label>
                 <Input name="title" value={formData.title} onChange={handleChange} required />
               </div>
               <div>
                 <Label>Type</Label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  className="w-full border rounded-md h-10 px-3"
-                  required
-                >
+                <select name="type" value={formData.type} onChange={handleChange} required className="w-full border p-2 rounded">
                   <option value="">Select Type</option>
                   <option value="Residential">Residential</option>
                   <option value="Commercial">Commercial</option>
                   <option value="Agricultural">Agricultural</option>
-                  <option value="Industrial">Industrial</option>
                 </select>
               </div>
               <div className="md:col-span-2">
@@ -245,13 +167,7 @@ const ListYourLand = () => {
               </div>
               <div>
                 <Label>Available For</Label>
-                <select
-                  name="availableFor"
-                  value={formData.availableFor}
-                  onChange={handleChange}
-                  className="w-full border rounded-md h-10 px-3"
-                  required
-                >
+                <select name="availableFor" value={formData.availableFor} onChange={handleChange} required className="w-full border p-2 rounded">
                   <option value="">Select Option</option>
                   <option value="Sale">Sale</option>
                   <option value="Lease">Lease</option>
@@ -259,7 +175,7 @@ const ListYourLand = () => {
                 </select>
               </div>
               <div>
-                <Label>Price (in ₹)</Label>
+                <Label>Price (₹)</Label>
                 <Input name="price" value={formData.price} onChange={handleChange} type="number" required />
               </div>
               <div>
@@ -267,22 +183,8 @@ const ListYourLand = () => {
                 <Input name="size" value={formData.size} onChange={handleChange} type="number" required />
               </div>
               <div className="md:col-span-2">
-                <Label>Upload Land Images (jpg, jpeg, png)</Label>
+                <Label>Upload Land Images</Label>
                 <Input type="file" accept="image/png, image/jpeg" multiple onChange={handleImageChange} />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {imageFiles.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-200 px-3 py-1 rounded">
-                      <span className="text-sm truncate max-w-[120px]">{file.name}</span>
-                      <button
-                        type="button"
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleRemoveImage(index)}
-                      >
-                        ✖
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
               <div>
                 <Label>Contact Name</Label>
@@ -296,23 +198,24 @@ const ListYourLand = () => {
                 <Label>Contact Email</Label>
                 <Input name="contactEmail" value={formData.contactEmail} onChange={handleChange} type="email" required />
               </div>
-              <div className="md:col-span-2 text-center mt-4">
-                <Button type="submit" className="w-full">🚀 Preview Listing</Button>
+              <div className="md:col-span-2 text-center">
+                <Button type="submit" className="w-full">Preview Listing</Button>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
 
-      {/* Preview Modal */}
-      <PreviewModal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        formData={formData}
-        imageFiles={imageFiles}
-        // onSubmit={handleSubmit}
-        onSubmit={submitFinalListing}
-      />
+      {/* ✅ Preview Modal */}
+      {showPreview && (
+        <PreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          formData={formData}
+          imageFiles={imageFiles}
+          onSubmit={handleFinalSubmit}
+        />
+      )}
     </Layout>
   );
 };
