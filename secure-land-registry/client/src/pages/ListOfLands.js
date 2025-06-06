@@ -154,4 +154,36 @@ const ListOfLands = () => {
         ) : filteredLands.length === 0 ? (
           <div className="text-center text-red-500 font-medium mt-6">🚫 No lands found matching your filters.</div>
         ) : (
-          <
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {filteredLands.map((land) => (
+              <Card key={land._id} className="bg-white shadow-md hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <img
+                    src={land.images[0] || "https://via.placeholder.com/300x200"}
+                    alt={land.title}
+                    className="w-full h-48 object-cover rounded"
+                  />
+                </CardHeader>
+                <CardContent>
+                  <CardTitle className="text-lg font-semibold mb-1">{land.title}</CardTitle>
+                  <p className="text-sm text-gray-600 mb-1">{land.description}</p>
+                  <p className="text-sm text-gray-500 mb-1">
+                    📍 {land.location.city}, {land.location.state}
+                  </p>
+                  <p className="text-sm mb-3">
+                    💰 ₹{land.price} | 📐 {land.size} sq.ft | 📄 {land.type}
+                  </p>
+                  <Button className="w-full" onClick={() => handleEnquire(land.user)}>
+                    Enquire
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default ListOfLands;
