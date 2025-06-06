@@ -7,6 +7,8 @@ import Layout from "../components/Layout";
 import toast from "react-hot-toast";
 import PreviewModal from "../components/PreviewModal";
 
+const MAX_IMAGES = 5;
+
 const ListYourLand = () => {
   const [formData, setFormData] = useState({
     title: "",
@@ -41,6 +43,12 @@ const ListYourLand = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+
+    if (imageFiles.length + files.length > MAX_IMAGES) {
+      toast.error(`❌ You can only upload up to ${MAX_IMAGES} images.`);
+      return;
+    }
+
     setImageFiles((prev) => [...prev, ...files]);
   };
 
@@ -197,7 +205,7 @@ const ListYourLand = () => {
                 <Input name="size" value={formData.size} onChange={handleChange} type="number" required />
               </div>
               <div className="md:col-span-2">
-                <Label>Upload Land Images (jpg, jpeg, png)</Label>
+                <Label>Upload Land Images (Max 5 - jpg, jpeg, png)</Label>
                 <Input type="file" accept="image/png, image/jpeg" multiple onChange={handleImageChange} />
                 <div className="mt-2 flex flex-wrap gap-2">
                   {imageFiles.map((file, index) => (
@@ -241,7 +249,7 @@ const ListYourLand = () => {
         imageFiles={imageFiles}
         onSubmit={submitFinalListing}
       />
-    </Layout >
+    </Layout>
   );
 };
 
