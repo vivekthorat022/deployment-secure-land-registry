@@ -63,13 +63,81 @@ const ListYourLand = () => {
     return base64List;
   };
 
-  const handleSubmit = async () => {
+  // const handleSubmit = async () => {
+  //   try {
+  //     const base64Images = await convertImagesToBase64(imageFiles);
+
+  //     const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         userId,
+  //         title: formData.title,
+  //         description: formData.description,
+  //         type: formData.type,
+  //         location: {
+  //           state: formData.state,
+  //           district: formData.district,
+  //           city: formData.city,
+  //           pincode: formData.pincode
+  //         },
+  //         availableFor: formData.availableFor,
+  //         price: Number(formData.price),
+  //         size: Number(formData.size),
+  //         images: base64Images,
+  //         contactName: formData.contactName,
+  //         contactPhone: formData.contactPhone,
+  //         contactEmail: formData.contactEmail
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       toast.success("✅ Land listing submitted successfully!");
+  //       setFormData({
+  //         title: "",
+  //         description: "",
+  //         type: "",
+  //         state: "",
+  //         district: "",
+  //         city: "",
+  //         pincode: "",
+  //         availableFor: "",
+  //         price: "",
+  //         size: "",
+  //         contactName: "",
+  //         contactPhone: "",
+  //         contactEmail: ""
+  //       });
+  //       setImageFiles([]);
+  //       setIsPreviewOpen(false);
+  //     } else {
+  //       toast.error("❌ " + (data.error || "Something went wrong"));
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("❌ Failed to process images");
+  //   }
+  // };
+
+  // Modified Code for Preview Modal Submission Starts here : 
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsPreviewOpen(true);
+  };
+
+  const submitFinalListing = async () => {
     try {
       const base64Images = await convertImagesToBase64(imageFiles);
 
       const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           userId,
           title: formData.title,
@@ -106,6 +174,7 @@ const ListYourLand = () => {
           availableFor: "",
           price: "",
           size: "",
+          images: [],
           contactName: "",
           contactPhone: "",
           contactEmail: ""
@@ -120,6 +189,10 @@ const ListYourLand = () => {
       toast.error("❌ Failed to process images");
     }
   };
+
+
+
+  // Modified Code for Preview Modal Submission Ends here : 
 
   return (
     <Layout>
@@ -237,7 +310,8 @@ const ListYourLand = () => {
         onClose={() => setIsPreviewOpen(false)}
         formData={formData}
         imageFiles={imageFiles}
-        onSubmit={handleSubmit}
+        // onSubmit={handleSubmit}
+        onSubmit={submitFinalListing}
       />
     </Layout>
   );
