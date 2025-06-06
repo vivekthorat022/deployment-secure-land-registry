@@ -13,7 +13,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
+
+        <Route path="/" element={<LoginPage />} />
+
         <Route path="/profile" element={<Profile />} />
         <Route path="/list-land" element={<ListYourLand />} />
         <Route path="/admin/land-approval" element={<AdminApproval />} />
@@ -22,6 +25,9 @@ function App() {
         <Route path="/land/:id" element={<LandInquiryPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/transactions" element={<TransactionHistory />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
       </Routes>
     </Router>
   );
