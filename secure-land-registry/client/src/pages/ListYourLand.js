@@ -4,8 +4,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import Layout from "../components/Layout";
-import toast from "react-hot-toast";
 import PreviewModal from "../components/PreviewModal";
+import toast from "react-hot-toast";
 
 const ListYourLand = () => {
   const [formData, setFormData] = useState({
@@ -26,12 +26,13 @@ const ListYourLand = () => {
   });
 
   const [imageFiles, setImageFiles] = useState([]);
-  const [showPreview, setShowPreview] = useState(false);
-
+  const [previewOpen, setPreviewOpen] = useState(false);
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    if (!userId) toast.error("❌ User not logged in");
+    if (!userId) {
+      toast.error("❌ User not logged in");
+    }
   }, [userId]);
 
   const handleChange = (e) => {
@@ -59,13 +60,16 @@ const ListYourLand = () => {
     return base64List;
   };
 
-  const handleFinalSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
       const base64Images = await convertImagesToBase64(imageFiles);
 
       const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           userId,
           title: formData.title,
@@ -88,7 +92,6 @@ const ListYourLand = () => {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         toast.success("✅ Land listing submitted successfully!");
         setFormData({
@@ -108,19 +111,13 @@ const ListYourLand = () => {
           contactEmail: ""
         });
         setImageFiles([]);
-        setShowPreview(false);
       } else {
         toast.error("❌ " + (data.error || "Something went wrong"));
       }
     } catch (err) {
       console.error(err);
-      toast.error("❌ Failed to submit land listing");
+      toast.error("❌ Failed to process images");
     }
-  };
-
-  const handlePreview = (e) => {
-    e.preventDefault();
-    setShowPreview(true);
   };
 
   return (
@@ -131,18 +128,19 @@ const ListYourLand = () => {
             <CardTitle className="text-2xl">📋 List Your Land</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handlePreview}>
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
               <div>
                 <Label>Title</Label>
                 <Input name="title" value={formData.title} onChange={handleChange} required />
               </div>
               <div>
                 <Label>Type</Label>
-                <select name="type" value={formData.type} onChange={handleChange} required className="w-full border p-2 rounded">
+                <select name="type" value={formData.type} onChange={handleChange} className="w-full border rounded p-2" required>
                   <option value="">Select Type</option>
                   <option value="Residential">Residential</option>
                   <option value="Commercial">Commercial</option>
                   <option value="Agricultural">Agricultural</option>
+                  <option value="Industrial">Industrial</option>
                 </select>
               </div>
               <div className="md:col-span-2">
@@ -167,15 +165,15 @@ const ListYourLand = () => {
               </div>
               <div>
                 <Label>Available For</Label>
-                <select name="availableFor" value={formData.availableFor} onChange={handleChange} required className="w-full border p-2 rounded">
-                  <option value="">Select Option</option>
+                <select name="availableFor" value={formData.availableFor} onChange={handleChange} className="w-full border rounded p-2" required>
+                  <option value="">Select Availability</option>
                   <option value="Sale">Sale</option>
                   <option value="Lease">Lease</option>
                   <option value="Both">Both</option>
                 </select>
               </div>
               <div>
-                <Label>Price (₹)</Label>
+                <Label>Price (in ₹)</Label>
                 <Input name="price" value={formData.price} onChange={handleChange} type="number" required />
               </div>
               <div>
@@ -185,6 +183,11 @@ const ListYourLand = () => {
               <div className="md:col-span-2">
                 <Label>Upload Land Images</Label>
                 <Input type="file" accept="image/png, image/jpeg" multiple onChange={handleImageChange} />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {imageFiles.map((file, index) => (
+                    <div key={index} className="text-sm text-gray-700">{file.name}</div>
+                  ))}
+                </div>
               </div>
               <div>
                 <Label>Contact Name</Label>
@@ -198,24 +201,20 @@ const ListYourLand = () => {
                 <Label>Contact Email</Label>
                 <Input name="contactEmail" value={formData.contactEmail} onChange={handleChange} type="email" required />
               </div>
-              <div className="md:col-span-2 text-center">
-                <Button type="submit" className="w-full">Preview Listing</Button>
+              <div className="md:col-span-2 flex justify-between items-center mt-4">
+                <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>👁️ View Preview</Button>
+                <Button type="submit">🚀 Submit Listing</Button>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
-
-      {/* ✅ Preview Modal */}
-      {showPreview && (
-        <PreviewModal
-          isOpen={showPreview}
-          onClose={() => setShowPreview(false)}
-          formData={formData}
-          imageFiles={imageFiles}
-          onSubmit={handleFinalSubmit}
-        />
-      )}
+      <PreviewModal
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        formData={formData}
+        imageFiles={imageFiles}
+      />
     </Layout>
   );
 };

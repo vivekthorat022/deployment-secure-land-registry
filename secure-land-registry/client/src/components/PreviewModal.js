@@ -2,7 +2,7 @@ import React from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "./ui/button";
 
-const PreviewModal = ({ isOpen, onClose, formData, imageFiles, onSubmit }) => {
+const PreviewModal = ({ isOpen, onClose, formData, imageFiles }) => {
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen bg-black bg-opacity-30">
@@ -36,9 +36,8 @@ const PreviewModal = ({ isOpen, onClose, formData, imageFiles, onSubmit }) => {
               ))}
             </div>
           </div>
-          <div className="mt-6 flex justify-end gap-4">
-            <Button onClick={onClose} variant="outline">Cancel</Button>
-            <Button onClick={onSubmit}>Submit</Button>
+          <div className="mt-6 flex justify-end">
+            <Button onClick={onClose}>Close Preview</Button>
           </div>
         </Dialog.Panel>
       </div>
