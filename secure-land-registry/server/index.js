@@ -27,6 +27,11 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/messages', require('./routes/chatRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 
+// Default route for root
+app.get("/", (req, res) => {
+  res.send("✅ Secure Land Registry Backend is Running!");
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
