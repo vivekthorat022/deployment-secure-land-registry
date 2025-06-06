@@ -15,7 +15,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        {/* <Route path="/" element={<LoginPage />} /> */}
+        <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/list-land" element={<ListYourLand />} />
         <Route path="/admin/land-approval" element={<AdminApproval />} />
