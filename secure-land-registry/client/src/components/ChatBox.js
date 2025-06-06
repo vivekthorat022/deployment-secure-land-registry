@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 
 // Updated API https://land-registry-backend-h86i.onrender.com/api/
 // const socket = io("http://localhost:5000"); // adjust if server URL is different
-const socket = io("https://land-registry-backend-h86i.onrender.com"); // adjust if server URL is different
+// const socket = io("https://land-registry-backend-h86i.onrender.com"); // adjust if server URL is different
 
 const ChatBox = ({ senderId, receiverId }) => {
   const [messages, setMessages] = useState([]);
