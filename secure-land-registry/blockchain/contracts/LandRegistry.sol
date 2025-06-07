@@ -9,56 +9,52 @@ contract LandRegistry {
         uint256 timestamp;
     }
 
+    // Track land transactions by landId
     mapping(uint256 => LandTransaction) public transactions;
 
-    event TransactionCompleted(
-        uint256 indexed transactionId,
+    // Track ownership
+    mapping(uint256 => address) public ownerOf;
+
+    // Event emitted on purchase
+    event LandPurchased(
+        uint256 indexed landId,
         address indexed buyer,
         address indexed seller,
         uint256 price,
         uint256 timestamp
     );
 
-    function completeTransaction(
-        uint256 transactionId,
-        address buyer,
-        address seller,
-        uint256 price
-    ) external payable {
-        require(msg.sender == buyer, "Only buyer can complete transaction");
-        require(msg.value == price, "Incorrect payment amount");
+    // Function to buy land
+    function buyLand(uint256 landId, address seller) external payable {
+        require(ownerOf[landId] == address(0), "Land already sold");
 
-        payable(seller).transfer(msg.value);
+        uint256 price = msg.value;
+        require(price > 0, "Price must be greater than 0");
 
-        transactions[transactionId] = LandTransaction({
-            buyer: buyer,
+        // Transfer ETH to seller
+        payable(seller).transfer(price);
+
+        // Save transaction
+        transactions[landId] = LandTransaction({
+            buyer: msg.sender,
             seller: seller,
-            price: msg.value,
+            price: price,
             timestamp: block.timestamp
         });
 
-        emit TransactionCompleted(
-            transactionId,
-            buyer,
-            seller,
-            msg.value,
-            block.timestamp
-        );
+        // Assign ownership
+        ownerOf[landId] = msg.sender;
+
+        emit LandPurchased(landId, msg.sender, seller, price, block.timestamp);
     }
 
-    function getTransaction(
-        uint256 transactionId
-    )
+    // Optional: View transaction
+    function getTransaction(uint256 landId)
         public
         view
-        returns (
-            address buyer,
-            address seller,
-            uint256 price,
-            uint256 timestamp
-        )
+        returns (address, address, uint256, uint256)
     {
-        LandTransaction memory txData = transactions[transactionId];
+        LandTransaction memory txData = transactions[landId];
         return (txData.buyer, txData.seller, txData.price, txData.timestamp);
     }
 }

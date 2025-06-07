@@ -12,6 +12,8 @@ import TransactionHistory from "./pages/TransactionHistory";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
+import TestTransactionPage from "./pages/TestTransactionPage";
+
 function App() {
   return (
     <Router>
@@ -31,6 +33,8 @@ function App() {
 
         {/* Handle unmatched routes */}
         <Route path="*" element={<Navigate to="/login" replace />} />
+
+        <Route path="/test-transaction" element={<TestTransactionPage />} />
       </Routes>
 
       {/* Toast notifications container */}
