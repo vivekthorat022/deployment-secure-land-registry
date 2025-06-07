@@ -30,21 +30,20 @@ const LandDetailsModal = (props) => {
 
     const handleEnquire = () => {
         const userInfo = localStorage.getItem("userInfo");
-        console.log("userInfo from localStorage (LandDetailsModal):", userInfo); // This log will now correctly show the structure
+        console.log("userInfo from localStorage (LandDetailsModal):", userInfo); // Added for debugging
 
         if (!userInfo) {
-            toast.error("Please log in first to enquire about a land.");
-            onClose();
-            navigate("/login");
+            toast.error("Please log in first to enquire about a land."); // Better alert
+            onClose(); // Close modal if not logged in
+            navigate("/login"); // Redirect to login page
             return;
         }
 
         const currentUser = JSON.parse(userInfo);
 
-        // --- FIX: Access userId instead of _id for currentUser ---
-        if (currentUser.userId === land.userId._id) {
-            toast("You cannot enquire about your own listing.");
-            onClose();
+        if (currentUser._id === land.userId._id) {
+            toast("You cannot enquire about your own listing."); // Better alert
+            onClose(); // Close modal
             return;
         }
 
