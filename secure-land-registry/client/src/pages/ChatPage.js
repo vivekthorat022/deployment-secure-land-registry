@@ -1,39 +1,99 @@
-import React, { useContext } from "react";
-import { useSearchParams } from "react-router-dom";
-import ChatBox from "../components/ChatBox";
-import { WalletContext } from "../context/WalletContext";
+import React, { useEffect, useState } from "react";
+import socket from "../lib/socket";
+import ChatWindow from "../components/ChatWindow";
+import axios from "axios";
+import { useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
+import { Button } from "../components/ui/button";
 
 const ChatPage = () => {
-  const [searchParams] = useSearchParams();
-  const receiverId = searchParams.get("receiverId");
-  const { walletAddress } = useContext(WalletContext);
+  const location = useLocation();
+  const { landId, sellerId, sellerName } = location.state || {};
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [user, setUser] = useState(null);
 
-  // TEMP MAPPING — Replace this logic with actual user lookup later
-  const walletToUserMap = {
-    "0x805746433A187815cb146e9F89Fb4648DB2580bE": "665b72e4dfd31beab8c2f456", // You
-    "0x4a9DEbbbC39ac280a90fF4754d33a54631Db04f8": "665b8da781ecb6f271222244", // Someone else
+  const fetchUserFromLocalStorage = () => {
+    const storedUser = localStorage.getItem("userInfo");
+    if (storedUser) {
+      return JSON.parse(storedUser);
+    }
+    return null;
   };
 
-  const senderId = walletToUserMap[walletAddress];
+  useEffect(() => {
+    const currentUser = fetchUserFromLocalStorage();
+    if (!currentUser) return;
+    setUser(currentUser);
+
+    // Join chat room
+    socket.emit("join-room", {
+      landId,
+      userId: currentUser._id,
+      otherUserId: sellerId,
+    });
+
+    // Load previous messages
+    axios
+      .get(
+        `https://land-registry-backend-h86i.onrender.com/api/messages/${landId}/${sellerId}?currentUserId=${currentUser._id}`
+      )
+      .then((res) => setMessages(res.data))
+      .catch((err) => console.error("Error loading messages:", err));
+
+    // Listen for incoming messages
+    socket.on("receive-message", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    return () => {
+      socket.off("receive-message");
+    };
+  }, [landId, sellerId]);
+
+  const handleSend = () => {
+    if (!message.trim()) return;
+
+    const newMessage = {
+      landId,
+      senderId: user._id,
+      receiverId: sellerId,
+      message,
+    };
+
+    socket.emit("send-message", newMessage);
+    setMessages((prev) => [...prev, newMessage]);
+    setMessage("");
+  };
 
   return (
     <Layout>
-      <div className="min-h-[70vh] bg-gray-900 text-white p-6">
-        {!senderId || !receiverId ? (
-          <p className="text-center text-red-500 text-lg mt-20">
-            ❌ Cannot chat. Wallet or receiver not found.
-          </p>
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold mb-6 text-center">
-              💬 Chat with Land Owner
-            </h1>
-            <div className="max-w-4xl mx-auto">
-              <ChatBox senderId={senderId} receiverId={receiverId} />
-            </div>
-          </>
-        )}
+      <div className="max-w-4xl mx-auto mt-6 h-[80vh] flex flex-col border rounded-xl shadow-lg bg-gray-50">
+        {/* Header */}
+        <div className="p-4 border-b flex justify-between items-center bg-white rounded-t-xl">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Chat with {sellerName || "Seller"}
+          </h2>
+          <Button>Buy Now</Button>
+        </div>
+
+        {/* Chat messages */}
+        <ChatWindow messages={messages} currentUserId={user?._id} />
+
+        {/* Input area */}
+        <div className="p-4 border-t flex items-center bg-white rounded-b-xl">
+          <input
+            type="text"
+            className="flex-1 border rounded-lg px-3 py-2 mr-2 text-sm"
+            placeholder="Type your message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSend();
+            }}
+          />
+          <Button onClick={handleSend}>Send</Button>
+        </div>
       </div>
     </Layout>
   );

@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
 
 const LandDetailsModal = (props) => {
-    const { isOpen, onClose, land, onEnquire } = props;
+    const { isOpen, onClose, land } = props;
+    const navigate = useNavigate();
 
     // Handle escape key press
     useEffect(() => {
@@ -14,7 +16,6 @@ const LandDetailsModal = (props) => {
 
         if (isOpen) {
             document.addEventListener("keydown", handleEscape);
-            // Prevent body scroll when modal is open
             document.body.style.overflow = "hidden";
         }
 
@@ -26,7 +27,28 @@ const LandDetailsModal = (props) => {
 
     if (!isOpen || !land) return null;
 
-    // Handle backdrop click
+    const handleEnquire = () => {
+        const userInfo = localStorage.getItem("userInfo");
+        if (!userInfo) return alert("Please log in first.");
+
+        const currentUser = JSON.parse(userInfo);
+
+        if (currentUser._id === land.userId._id) {
+            alert("You cannot enquire about your own listing.");
+            return;
+        }
+
+        onClose(); // Close modal before navigating
+
+        navigate("/chat", {
+            state: {
+                landId: land._id,
+                sellerId: land.userId._id,
+                sellerName: land.userId.name,
+            },
+        });
+    };
+
     const handleBackdropClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
@@ -109,7 +131,7 @@ const LandDetailsModal = (props) => {
                         <Button variant="outline" onClick={onClose}>
                             Close
                         </Button>
-                        <Button onClick={onEnquire}>
+                        <Button onClick={handleEnquire}>
                             Enquire
                         </Button>
                     </div>
