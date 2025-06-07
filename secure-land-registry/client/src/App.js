@@ -11,14 +11,12 @@ import ChatPage from "./pages/ChatPage";
 import TransactionHistory from "./pages/TransactionHistory";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-
 import TestTransactionPage from "./pages/TestTransactionPage";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<LoginPage />} /> */}
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/list-land" element={<ListYourLand />} />
@@ -30,15 +28,12 @@ function App() {
         <Route path="/transactions" element={<TransactionHistory />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-
         <Route path="/test-transaction" element={<TestTransactionPage />} />
 
-        {/* Handle unmatched Wildcard routes */}
+        {/* ✅ WILDCARD MUST BE LAST */}
         <Route path="*" element={<Navigate to="/login" replace />} />
-
       </Routes>
 
-      {/* Toast notifications container */}
       <Toaster
         position="top-right"
         toastOptions={{
