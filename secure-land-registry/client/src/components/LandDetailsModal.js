@@ -33,6 +33,11 @@ const LandDetailsModal = (props) => {
 
         const currentUser = JSON.parse(userInfo);
 
+        if (!land.userId || !land.userId._id) {
+            alert("Seller information is unavailable.");
+            return;
+        }
+
         if (currentUser._id === land.userId._id) {
             alert("You cannot enquire about your own listing.");
             return;
