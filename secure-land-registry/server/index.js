@@ -6,12 +6,17 @@ require('dotenv').config(); // ✅ Load environment variables
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '10mb' })); // ✅ Increased JSON body limit
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // ✅ Handle URL-encoded data too
+// ✅ CORS Configuration — allows requests from your deployed frontend
+app.use(cors({
+  origin: "https://land-registry-frontend.onrender.com",
+  credentials: true,
+}));
 
-// Connect to MongoDB Atlas using .env variable
+// ✅ Middleware to parse JSON and URL-encoded data
+app.use(express.json({ limit: '10mb' })); // Increased JSON body limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Handle URL-encoded data too
+
+// ✅ Connect to MongoDB Atlas using .env variable
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -21,19 +26,19 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error('❌ MongoDB Connection Error:', err);
 });
 
-// Routes
+// ✅ Routes
 app.use('/api', require('./routes/authRoutes'));
 app.use('/api/lands', require('./routes/landRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/messages', require('./routes/chatRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 
-// Default route for root
+// ✅ Default route for root
 app.get("/", (req, res) => {
   res.send("✅ Secure Land Registry Backend is Running!");
 });
 
-// Start server
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
