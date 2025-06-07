@@ -1,54 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Message = require('../models/Message');
+const Message = require("../models/Message");
 
-// @route   POST /api/messages
-// @desc    Send a message
-// @access  Public (but ideally should be protected)
-router.post('/', async (req, res) => {
+// Get all messages between two users for a specific land
+router.get("/:landId/:userId", async (req, res) => {
   try {
-    const { sender, receiver, land, content } = req.body;
-
-    if (!sender || !receiver || !land || !content) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const newMessage = new Message({
-      sender,
-      receiver,
-      land,
-      content
-    });
-
-    await newMessage.save();
-    res.status(201).json({ message: 'Message sent successfully' });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error while sending message' });
-  }
-});
-
-// @route   GET /api/messages/:landId/:user1Id/:user2Id
-// @desc    Fetch all messages between two users about a land
-// @access  Public (but ideally should be protected)
-router.get('/:landId/:user1Id/:user2Id', async (req, res) => {
-  try {
-    const { landId, user1Id, user2Id } = req.params;
+    const { landId, userId } = req.params;
+    const currentUserId = req.query.currentUserId;
 
     const messages = await Message.find({
-      land: landId,
+      landId,
       $or: [
-        { sender: user1Id, receiver: user2Id },
-        { sender: user2Id, receiver: user1Id }
-      ]
-    }).sort({ createdAt: 1 }); // Sort oldest to newest
+        { senderId: userId, receiverId: currentUserId },
+        { senderId: currentUserId, receiverId: userId },
+      ],
+    }).sort({ timestamp: 1 });
 
-    res.status(200).json(messages);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error while fetching messages' });
+    res.json(messages);
+  } catch (error) {
+    console.error("Error loading messages:", error);
+    res.status(500).json({ message: "Failed to load messages" });
   }
 });
 
