@@ -91,6 +91,32 @@ const ListOfLands = () => {
     setIsModalOpen(true);
   };
 
+  // const handleEnquire = () => {
+  //   console.log("HandleEnquire called"); // Debug log
+  //   console.log("Selected land:", selectedLand); // Debug log
+  //   console.log("Current userId:", userId); // Debug log
+  //   console.log("Land user:", selectedLand?.user); // Debug log
+
+  //   if (!selectedLand || !selectedLand.user) {
+  //     toast.error("❌ Invalid land selection");
+  //     return;
+  //   }
+
+  //   // Convert both to strings for comparison to avoid type mismatches
+  //   const currentUserId = String(userId);
+  //   const landUserId = String(selectedLand.user);
+
+  //   console.log("Comparing:", currentUserId, "vs", landUserId); // Debug log
+
+  //   if (currentUserId === landUserId) {
+  //     toast.error("⚠️ You already own this land listing.");
+  //     console.log("Same user - showing toast"); // Debug log
+  //   } else {
+  //     console.log("Different user - navigating to chat"); // Debug log
+  //     navigate(`/chat?receiverId=${selectedLand.user}`);
+  //   }
+  // };
+
   const handleEnquire = () => {
     console.log("HandleEnquire called"); // Debug log
     console.log("Selected land:", selectedLand); // Debug log
@@ -102,17 +128,27 @@ const ListOfLands = () => {
       return;
     }
 
-    // Convert both to strings for comparison to avoid type mismatches
-    const currentUserId = String(userId);
-    const landUserId = String(selectedLand.user);
+    if (!userId) {
+      toast.error("❌ Please log in to enquire about this land");
+      return;
+    }
 
-    console.log("Comparing:", currentUserId, "vs", landUserId); // Debug log
+    // Convert both to strings for comparison to avoid type mismatches
+    const currentUserId = String(userId).trim();
+    const landUserId = String(selectedLand.user).trim();
+
+    console.log("Comparing (after string conversion):", `'${currentUserId}'`, "vs", `'${landUserId}'`); // Debug log
+    console.log("Are they equal?", currentUserId === landUserId); // Debug log
 
     if (currentUserId === landUserId) {
+      console.log("Same user detected - showing toast"); // Debug log
       toast.error("⚠️ You already own this land listing.");
-      console.log("Same user - showing toast"); // Debug log
+      // Close the modal after showing the message
+      setIsModalOpen(false);
     } else {
       console.log("Different user - navigating to chat"); // Debug log
+      // Close the modal before navigating
+      setIsModalOpen(false);
       navigate(`/chat?receiverId=${selectedLand.user}`);
     }
   };
