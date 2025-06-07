@@ -31,10 +31,11 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Handle unmatched routes */}
+        <Route path="/test-transaction" element={<TestTransactionPage />} />
+
+        {/* Handle unmatched Wildcard routes */}
         <Route path="*" element={<Navigate to="/login" replace />} />
 
-        <Route path="/test-transaction" element={<TestTransactionPage />} />
       </Routes>
 
       {/* Toast notifications container */}
