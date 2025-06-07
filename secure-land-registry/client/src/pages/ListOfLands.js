@@ -23,6 +23,7 @@ const ListOfLands = () => {
   const [loading, setLoading] = useState(false);
   const [selectedLand, setSelectedLand] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9); // Pagination state
 
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
@@ -32,7 +33,7 @@ const ListOfLands = () => {
     try {
       const res = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands/approved");
       const data = await res.json();
-      console.log("Fetched lands:", data); // Debug log
+      console.log("Fetched lands:", data);
       setLands(data);
       setFilteredLands(data);
     } catch (err) {
@@ -74,6 +75,7 @@ const ListOfLands = () => {
     }
 
     setFilteredLands(result);
+    setVisibleCount(9); // Reset pagination on filter change
   };
 
   useEffect(() => {
@@ -91,38 +93,7 @@ const ListOfLands = () => {
     setIsModalOpen(true);
   };
 
-  // const handleEnquire = () => {
-  //   console.log("HandleEnquire called"); // Debug log
-  //   console.log("Selected land:", selectedLand); // Debug log
-  //   console.log("Current userId:", userId); // Debug log
-  //   console.log("Land user:", selectedLand?.user); // Debug log
-
-  //   if (!selectedLand || !selectedLand.user) {
-  //     toast.error("❌ Invalid land selection");
-  //     return;
-  //   }
-
-  //   // Convert both to strings for comparison to avoid type mismatches
-  //   const currentUserId = String(userId);
-  //   const landUserId = String(selectedLand.user);
-
-  //   console.log("Comparing:", currentUserId, "vs", landUserId); // Debug log
-
-  //   if (currentUserId === landUserId) {
-  //     toast.error("⚠️ You already own this land listing.");
-  //     console.log("Same user - showing toast"); // Debug log
-  //   } else {
-  //     console.log("Different user - navigating to chat"); // Debug log
-  //     navigate(`/chat?receiverId=${selectedLand.user}`);
-  //   }
-  // };
-
   const handleEnquire = () => {
-    console.log("HandleEnquire called"); // Debug log
-    console.log("Selected land:", selectedLand); // Debug log
-    console.log("Current userId:", userId); // Debug log
-    console.log("Land user:", selectedLand?.user); // Debug log
-
     if (!selectedLand || !selectedLand.user) {
       toast.error("❌ Invalid land selection");
       return;
@@ -133,24 +104,20 @@ const ListOfLands = () => {
       return;
     }
 
-    // Convert both to strings for comparison to avoid type mismatches
     const currentUserId = String(userId).trim();
     const landUserId = String(selectedLand.user).trim();
 
-    console.log("Comparing (after string conversion):", `'${currentUserId}'`, "vs", `'${landUserId}'`); // Debug log
-    console.log("Are they equal?", currentUserId === landUserId); // Debug log
-
     if (currentUserId === landUserId) {
-      console.log("Same user detected - showing toast"); // Debug log
       toast.error("⚠️ You already own this land listing.");
-      // Close the modal after showing the message
       setIsModalOpen(false);
     } else {
-      console.log("Different user - navigating to chat"); // Debug log
-      // Close the modal before navigating
       setIsModalOpen(false);
       navigate(`/chat?receiverId=${selectedLand.user}`);
     }
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 6);
   };
 
   return (
@@ -205,39 +172,48 @@ const ListOfLands = () => {
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* Loading or Result */}
         {loading ? (
           <div className="text-center text-gray-600">🔄 Loading listings...</div>
         ) : filteredLands.length === 0 ? (
           <div className="text-center text-red-500 font-medium mt-6">❌ No lands found matching your filters.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {filteredLands.map((land) => (
-              <Card key={land._id} className="relative bg-white shadow-md hover:shadow-xl transition-shadow border border-gray-200 rounded-lg overflow-hidden">
-                {land.user === userId && (
-                  <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
-                    Your Listing
-                  </span>
-                )}
-                <CardHeader className="p-0">
-                  <img
-                    src={land.images && land.images[0] || "https://placehold.co/300x200?text=No+Image"}
-                    alt={land.title}
-                    className="w-full h-48 object-cover"
-                  />
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg font-semibold mb-1">{land.title}</CardTitle>
-                  <p className="text-sm text-gray-600 mb-1">{land.description}</p>
-                  <p className="text-sm text-gray-500 mb-1">📍 {land.location?.city}, {land.location?.state}</p>
-                  <p className="text-sm mb-3">💰 ₹{land.price} | 📀 {land.size} sq.ft | 📄 {land.type}</p>
-                  <Button className="w-full" onClick={() => openModal(land)}>
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {filteredLands.slice(0, visibleCount).map((land) => (
+                <Card key={land._id} className="relative bg-white shadow-md hover:shadow-xl transition-shadow border border-gray-200 rounded-lg overflow-hidden">
+                  {land.user === userId && (
+                    <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
+                      Your Listing
+                    </span>
+                  )}
+                  <CardHeader className="p-0">
+                    <img
+                      src={(land.images && land.images[0]) || "https://placehold.co/300x200?text=No+Image"}
+                      alt={land.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <CardTitle className="text-lg font-semibold mb-1">{land.title}</CardTitle>
+                    <p className="text-sm text-gray-600 mb-1">{land.description}</p>
+                    <p className="text-sm text-gray-500 mb-1">📍 {land.location?.city}, {land.location?.state}</p>
+                    <p className="text-sm mb-3">💰 ₹{land.price} | 📀 {land.size} sq.ft | 📄 {land.type}</p>
+                    <Button className="w-full" onClick={() => openModal(land)}>
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {visibleCount < filteredLands.length && (
+              <div className="flex justify-center mt-8">
+                <Button onClick={handleLoadMore}>Load More</Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
