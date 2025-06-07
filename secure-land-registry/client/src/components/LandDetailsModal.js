@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast"; // Import toast for better alerts
 
 const LandDetailsModal = (props) => {
     const { isOpen, onClose, land } = props;
@@ -29,12 +30,20 @@ const LandDetailsModal = (props) => {
 
     const handleEnquire = () => {
         const userInfo = localStorage.getItem("userInfo");
-        if (!userInfo) return alert("Please log in first.");
+        console.log("userInfo from localStorage (LandDetailsModal):", userInfo); // Added for debugging
+
+        if (!userInfo) {
+            toast.error("Please log in first to enquire about a land."); // Better alert
+            onClose(); // Close modal if not logged in
+            navigate("/login"); // Redirect to login page
+            return;
+        }
 
         const currentUser = JSON.parse(userInfo);
 
         if (currentUser._id === land.userId._id) {
-            alert("You cannot enquire about your own listing.");
+            toast("You cannot enquire about your own listing."); // Better alert
+            onClose(); // Close modal
             return;
         }
 

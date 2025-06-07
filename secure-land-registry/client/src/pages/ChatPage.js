@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import socket from "../lib/socket";
 import ChatWindow from "../components/ChatWindow";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Import useNavigate
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
+import toast from "react-hot-toast"; // Import toast
 
 const ChatPage = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // Initialize useNavigate
   const { landId, sellerId, sellerName } = location.state || {};
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -23,8 +25,19 @@ const ChatPage = () => {
 
   useEffect(() => {
     const currentUser = fetchUserFromLocalStorage();
-    if (!currentUser) return;
+    if (!currentUser) {
+      toast.error("You need to be logged in to view chat.");
+      navigate("/login", { replace: true }); // Redirect to login
+      return;
+    }
     setUser(currentUser);
+
+    // Ensure landId and sellerId are available from location state
+    if (!landId || !sellerId) {
+      toast.error("Chat details are missing. Please try again from the land details page.");
+      navigate("/lands", { replace: true }); // Redirect to lands page
+      return;
+    }
 
     // Join chat room
     socket.emit("join-room", {
@@ -39,7 +52,10 @@ const ChatPage = () => {
         `https://land-registry-backend-h86i.onrender.com/api/messages/${landId}/${sellerId}?currentUserId=${currentUser._id}`
       )
       .then((res) => setMessages(res.data))
-      .catch((err) => console.error("Error loading messages:", err));
+      .catch((err) => {
+        console.error("Error loading messages:", err);
+        toast.error("Failed to load chat history.");
+      });
 
     // Listen for incoming messages
     socket.on("receive-message", (msg) => {
@@ -49,10 +65,15 @@ const ChatPage = () => {
     return () => {
       socket.off("receive-message");
     };
-  }, [landId, sellerId]);
+  }, [landId, sellerId, navigate]); // Add navigate to dependency array
 
   const handleSend = () => {
     if (!message.trim()) return;
+
+    if (!user || !landId || !sellerId) {
+      toast.error("Cannot send message. Missing user or chat details.");
+      return;
+    }
 
     const newMessage = {
       landId,
