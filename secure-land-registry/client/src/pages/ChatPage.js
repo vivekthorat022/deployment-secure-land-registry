@@ -6,6 +6,9 @@ import { useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
 import { toast } from "react-hot-toast";
+// import { getWeb3Instance } from "../lib/web3";
+import { getWeb3Instance } from "../lib/web3LandRegistry";
+
 
 const ChatPage = () => {
   const location = useLocation();
@@ -13,8 +16,9 @@ const ChatPage = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
-
   const [landOwnerId, setLandOwnerId] = useState(null);
+  const [initiationDone, setInitiationDone] = useState(false);
+  const [sellerWallet, setSellerWallet] = useState("");
 
   const fetchUserFromLocalStorage = () => {
     const storedUser = localStorage.getItem("userInfo");
@@ -30,28 +34,17 @@ const ChatPage = () => {
     }
     setUser(currentUser);
 
-    // Modification begins
-
     if (landId) {
       axios
         .get(`http://localhost:5000/api/lands/${landId}`)
         .then((res) => {
-          const ownerId = res.data.user._id;
-          console.log("✅ Land owner ID:", ownerId);
-          setLandOwnerId(ownerId);
+          const owner = res.data.user;
+          setLandOwnerId(owner._id);
+          setSellerWallet(owner.wallet); // 🟡 Assuming seller wallet is saved in land.user.wallet
         })
         .catch((err) => {
           console.error("❌ Failed to fetch land owner info:", err);
         });
-    }
-
-    // Modification ends
-
-    console.log("🔍 ChatPage params:", { landId, sellerId, sellerName, userId: currentUser._id });
-
-    if (!sellerId || !sellerName) {
-      console.error("❌ Seller info missing");
-      toast.error("Seller info unavailable");
     }
 
     socket.emit("join-room", {
@@ -63,8 +56,8 @@ const ChatPage = () => {
     socket.on("connect", () => {
       console.log("🔗 Socket.IO connected:", socket.id);
     });
+
     socket.on("connect_error", (err) => {
-      console.error("❌ Socket.IO error:", err.message);
       toast.error("Socket connection failed");
     });
 
@@ -72,22 +65,23 @@ const ChatPage = () => {
       axios
         .get(`http://localhost:5000/api/messages/${landId}/${sellerId}?currentUserId=${currentUser._id}`)
         .then((res) => {
-          console.log("💬 Loaded messages:", res.data);
           setMessages(res.data);
+
+          const alreadyInitiated = res.data.some(
+            (msg) => msg.type === "system" && msg.message.includes("ready to proceed")
+          );
+          setInitiationDone(alreadyInitiated);
         })
         .catch((err) => {
-          console.error("❌ Error loading messages:", err);
           toast.error("Failed to load chat history");
         });
     }
 
     socket.on("receive-message", (msg) => {
-      console.log("💬 Real-time message received:", msg);
       setMessages((prev) => [...prev, msg]);
     });
 
     socket.on("message-error", ({ error }) => {
-      console.error("❌ Socket message error:", error);
       toast.error(error);
     });
 
@@ -101,10 +95,7 @@ const ChatPage = () => {
 
   const handleSend = async () => {
     if (!message.trim()) return;
-    if (!sellerId) {
-      toast.error("Seller ID missing");
-      return;
-    }
+    if (!sellerId) return toast.error("Seller ID missing");
 
     const newMessage = {
       landId,
@@ -121,15 +112,71 @@ const ChatPage = () => {
       });
 
       const savedMessage = await response.json();
-
       if (!response.ok) throw new Error(savedMessage.error || "Unknown error");
 
-      // setMessages((prev) => [...prev, savedMessage]); // Show locally
-      socket.emit("send-message", savedMessage); // Broadcast to others
+      socket.emit("send-message", savedMessage);
       setMessage("");
     } catch (err) {
-      console.error("❌ Message send failed:", err.message);
       toast.error("Failed to send message");
+    }
+  };
+
+  const handleInitiate = async () => {
+    if (!user || !landId || !landOwnerId) return toast.error("Missing required info");
+
+    // SELLER LOGIC
+    if (String(user._id) === String(landOwnerId)) {
+      const potentialBuyerMsg = messages.find((msg) => msg.senderId !== user._id);
+      const buyerId = potentialBuyerMsg?.senderId;
+      if (!buyerId) return toast.error("Buyer not identified in chat");
+
+      try {
+        const res = await fetch("http://localhost:5000/api/transaction-initiations/initiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ landId, sellerId: user._id, buyerId }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Unknown error");
+
+        toast.success("Transaction initiated successfully");
+        setMessages((prev) => [...prev, data.systemMessage]);
+        setInitiationDone(true);
+      } catch (err) {
+        toast.error("Failed to initiate transaction");
+      }
+    }
+
+    // BUYER METAMASK LOGIC
+    else {
+      if (!initiationDone) return toast.error("Seller hasn't initiated transaction yet");
+
+      try {
+        const web3 = await getWeb3Instance();
+        const accounts = await web3.eth.getAccounts();
+        const from = accounts[0];
+
+        if (!sellerWallet) return toast.error("Seller wallet not found");
+
+        const valueInEth = "0.01";
+        const valueInWei = web3.utils.toWei(valueInEth, "ether");
+
+        toast.loading("Sending transaction...");
+
+        await web3.eth.sendTransaction({
+          from,
+          to: sellerWallet,
+          value: valueInWei,
+        });
+
+        toast.dismiss();
+        toast.success("Payment successful via MetaMask!");
+      } catch (err) {
+        toast.dismiss();
+        console.error("❌ MetaMask Error:", err);
+        toast.error("Transaction failed");
+      }
     }
   };
 
@@ -141,52 +188,17 @@ const ChatPage = () => {
             Chat with {sellerName || "Unknown Seller"}
           </h2>
 
-          <Button
-            onClick={async () => {
-              if (!user || !landId || !landOwnerId) return toast.error("Missing required info");
-
-              if (String(user._id) !== String(landOwnerId)) {
-                toast.error("Only the seller can initiate the transaction");
-                return;
-              }
-
-              // Log the values before API call
-              console.log("📦 Initiate Transaction Payload:", {
-                landId,
-                sellerId: user._id,
-                buyerId: location.state?.buyerId,
-              });
-
-              try {
-                const res = await fetch("http://localhost:5000/api/transaction-initiations/initiate", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    landId,
-                    sellerId: user._id,
-                    buyerId: location.state?.buyerId || "",
-                  }),
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) throw new Error(data.error || "Unknown error");
-
-                toast.success("Transaction initiated successfully");
-
-                // Update messages list with new system message
-                setMessages((prev) => [...prev, data.systemMessage]);
-              } catch (err) {
-                console.error("❌ Transaction initiation failed:", err);
-                toast.error("Failed to initiate transaction");
-              }
-            }}
-          >
-            Initiate Transaction
+          <Button onClick={handleInitiate}>
+            {String(user?._id) === String(landOwnerId)
+              ? initiationDone
+                ? "Initiation Sent"
+                : "Initiate Transaction"
+              : "Make Payment"}
           </Button>
         </div>
 
         <ChatWindow messages={messages} currentUserId={user?._id} />
+
         <div className="p-4 border-t flex items-center bg-white rounded-b-xl">
           <input
             type="text"

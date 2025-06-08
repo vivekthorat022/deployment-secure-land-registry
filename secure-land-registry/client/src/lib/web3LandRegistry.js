@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import LandRegistryArtifact from "../abis/LandRegistry.json";
 
-const CONTRACT_ADDRESS = "0x5B050C78Ff3940980802faE38632E70C1992E88e"; // Your deployed address
+const CONTRACT_ADDRESS = "0x5B050C78Ff3940980802faE38632E70C1992E88e"; // Deployed address
 
 let web3;
 let contract;
@@ -19,6 +19,9 @@ export const getWeb3 = async () => {
   }
   return web3;
 };
+
+// 👇 This alias helps support the ChatPage.js version
+export const getWeb3Instance = getWeb3;
 
 export const getContract = async () => {
   if (!web3) await getWeb3();
