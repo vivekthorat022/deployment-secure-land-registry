@@ -13,14 +13,12 @@ router.post("/initiate", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Create transaction initiation flag
     const initiation = await TransactionInitiation.create({
       landId,
       sellerId,
       buyerId,
     });
 
-    // Create system message in chat
     const systemMessage = await Message.create({
       landId,
       senderId: sellerId,
@@ -34,6 +32,31 @@ router.post("/initiate", async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to initiate transaction:", err);
     return res.status(500).json({ error: "Failed to initiate transaction" });
+  }
+});
+
+// ✅ NEW: Check if transaction already initiated
+// @route   GET /api/transaction-initiations/check
+// @desc    Check if a transaction is already initiated
+router.get("/check", async (req, res) => {
+  try {
+    const { landId, sellerId, buyerId } = req.query;
+
+    if (!landId || !sellerId || !buyerId) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    const existing = await TransactionInitiation.findOne({
+      landId,
+      sellerId,
+      buyerId,
+      status: "initiated",
+    });
+
+    return res.status(200).json({ initiated: !!existing });
+  } catch (err) {
+    console.error("❌ Error checking transaction initiation:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 

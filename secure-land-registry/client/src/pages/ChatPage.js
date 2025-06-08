@@ -6,9 +6,7 @@ import { useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
 import { toast } from "react-hot-toast";
-// import { getWeb3Instance } from "../lib/web3";
 import { getWeb3Instance } from "../lib/web3LandRegistry";
-
 
 const ChatPage = () => {
   const location = useLocation();
@@ -40,7 +38,9 @@ const ChatPage = () => {
         .then((res) => {
           const owner = res.data.user;
           setLandOwnerId(owner._id);
-          setSellerWallet(owner.wallet); // 🟡 Assuming seller wallet is saved in land.user.wallet
+          // setSellerWallet(owner.wallet);
+          setSellerWallet(owner.walletAddress);
+
         })
         .catch((err) => {
           console.error("❌ Failed to fetch land owner info:", err);
@@ -74,6 +74,25 @@ const ChatPage = () => {
         })
         .catch((err) => {
           toast.error("Failed to load chat history");
+        });
+
+      // ✅ Check backend for actual transaction initiation
+      axios
+        .get(`http://localhost:5000/api/transaction-initiations/check`, {
+          params: {
+            landId,
+            buyerId: currentUser._id,
+            sellerId,
+          },
+        })
+        .then((res) => {
+          if (res.data.initiated) {
+            setInitiationDone(true);
+            console.log("✅ Verified: Seller has already initiated the transaction.");
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Failed to verify transaction initiation:", err);
         });
     }
 
@@ -124,7 +143,7 @@ const ChatPage = () => {
   const handleInitiate = async () => {
     if (!user || !landId || !landOwnerId) return toast.error("Missing required info");
 
-    // SELLER LOGIC
+    // ✅ SELLER logic
     if (String(user._id) === String(landOwnerId)) {
       const potentialBuyerMsg = messages.find((msg) => msg.senderId !== user._id);
       const buyerId = potentialBuyerMsg?.senderId;
@@ -148,11 +167,22 @@ const ChatPage = () => {
       }
     }
 
-    // BUYER METAMASK LOGIC
+    // ✅ BUYER logic
     else {
-      if (!initiationDone) return toast.error("Seller hasn't initiated transaction yet");
-
       try {
+        // 🔁 Recheck live status from backend
+        const res = await axios.get("http://localhost:5000/api/transaction-initiations/check", {
+          params: {
+            landId,
+            buyerId: user._id,
+            sellerId,
+          },
+        });
+
+        if (!res.data.initiated) {
+          return toast.error("Seller hasn't initiated transaction yet");
+        }
+
         const web3 = await getWeb3Instance();
         const accounts = await web3.eth.getAccounts();
         const from = accounts[0];
