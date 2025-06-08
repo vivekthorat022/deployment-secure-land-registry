@@ -95,7 +95,7 @@ const ChatPage = () => {
     };
 
     try {
-    const response = await fetch("http://localhost:5000/api/messages", {
+      const response = await fetch("http://localhost:5000/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMessage),
@@ -121,7 +121,7 @@ const ChatPage = () => {
           <h2 className="text-lg font-semibold text-gray-800">
             Chat with {sellerName || "Unknown Seller"}
           </h2>
-          <Button>Buy Now</Button>
+          <Button>Initiate Transaction</Button>
         </div>
         <ChatWindow messages={messages} currentUserId={user?._id} />
         <div className="p-4 border-t flex items-center bg-white rounded-b-xl">
