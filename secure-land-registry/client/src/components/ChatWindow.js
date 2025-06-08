@@ -9,18 +9,37 @@ const ChatWindow = ({ messages, currentUserId }) => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 bg-white rounded-xl shadow-inner">
-      {messages.map((msg, idx) => (
-        <div
-          key={idx}
-          className={`mb-2 flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}
-        >
-          <div className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
-            msg.senderId === currentUserId ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
-          }`}>
-            {msg.message}
+      {messages.map((msg, idx) => {
+        if (msg.type === "system") {
+          return (
+            <div
+              key={idx}
+              className="mb-2 text-center text-sm text-gray-500 italic"
+            >
+              {msg.message}
+            </div>
+          );
+        }
+
+        return (
+          <div
+            key={idx}
+            className={`mb-2 flex ${
+              msg.senderId === currentUserId ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
+                msg.senderId === currentUserId
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-800"
+              }`}
+            >
+              {msg.message}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       <div ref={scrollRef}></div>
     </div>
   );

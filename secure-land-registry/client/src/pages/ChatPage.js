@@ -14,6 +14,8 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
 
+  const [landOwnerId, setLandOwnerId] = useState(null);
+
   const fetchUserFromLocalStorage = () => {
     const storedUser = localStorage.getItem("userInfo");
     if (!storedUser) return null;
@@ -27,6 +29,24 @@ const ChatPage = () => {
       return;
     }
     setUser(currentUser);
+
+    // Modification begins
+
+    if (landId) {
+      axios
+        .get(`http://localhost:5000/api/lands/${landId}`)
+        .then((res) => {
+          const ownerId = res.data.user._id;
+          console.log("✅ Land owner ID:", ownerId);
+          setLandOwnerId(ownerId);
+        })
+        .catch((err) => {
+          console.error("❌ Failed to fetch land owner info:", err);
+        });
+    }
+
+
+    // Modification ends
 
     console.log("🔍 ChatPage params:", { landId, sellerId, sellerName, userId: currentUser._id });
 
@@ -121,7 +141,34 @@ const ChatPage = () => {
           <h2 className="text-lg font-semibold text-gray-800">
             Chat with {sellerName || "Unknown Seller"}
           </h2>
-          <Button>Initiate Transaction</Button>
+          {/* Old button */}
+          {/* <Button>Initiate Transaction</Button> */}
+
+          {/* Modified Button start */}
+
+          <Button
+            onClick={() => {
+              if (!user || !landId || !landOwnerId) return toast.error("Missing required info");
+
+              if (String(user._id) !== String(landOwnerId)) {
+                toast.error("Only the seller can initiate the transaction");
+                return;
+              }
+
+              console.log("✅ Seller initiating transaction...");
+
+              socket.emit("initiate-transaction", {
+                landId,
+                sellerId: user._id,
+                buyerId: location.state?.buyerId || "", // adjust later if needed
+              });
+            }}
+          >
+            Initiate Transaction
+          </Button>
+
+          {/* Modified Button end */}
+
         </div>
         <ChatWindow messages={messages} currentUserId={user?._id} />
         <div className="p-4 border-t flex items-center bg-white rounded-b-xl">

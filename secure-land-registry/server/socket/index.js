@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
 
+// Modification
+
+const Message = require("../models/Message");
+const TransactionInitiation = require("../models/TransactionInitiation");
+
+// Modification 
+
 const setupSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("🟢 New socket connected:", socket.id);
@@ -27,6 +34,33 @@ const setupSocket = (io) => {
       console.log(`📡 Broadcasting message to room ${roomId}:`, data);
       io.to(roomId).emit("receive-message", data);
     });
+
+    // Modification
+
+    socket.on("initiate-transaction", async ({ landId, sellerId, buyerId }) => {
+      try {
+        // 1. Save the transaction initiation flag
+        await TransactionInitiation.create({ landId, sellerId, buyerId });
+
+        // 2. Save a system message in chat
+        const systemMessage = await Message.create({
+          landId,
+          senderId: sellerId,
+          receiverId: buyerId,
+          message: "Seller is ready to proceed with the transaction.",
+          type: "system",
+          timestamp: new Date(),
+        });
+
+        // 3. Broadcast to both users
+        io.emit("receive-message", systemMessage);
+      } catch (err) {
+        console.error("❌ Error initiating transaction:", err);
+        socket.emit("message-error", { error: "Failed to initiate transaction" });
+      }
+    });
+
+    // Modification
 
     socket.on("disconnect", () => {
       console.log("🔴 Socket disconnected:", socket.id);
