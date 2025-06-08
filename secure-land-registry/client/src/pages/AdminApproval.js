@@ -9,7 +9,7 @@ const AdminApproval = () => {
   const fetchPendingLands = async () => {
     try {
       // const response = await fetch("http://localhost:5000/api/lands/pending");
-      const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands/pending");
+      const response = await fetch("http://localhost:5000/api/lands/pending");
       const data = await response.json();
       setLands(data);
     } catch (error) {
@@ -20,7 +20,7 @@ const AdminApproval = () => {
   const approveLand = async (landId) => {
     try {
       // const response = await fetch(`http://localhost:5000/api/lands/${landId}/approve`, {
-      const response = await fetch(`https://land-registry-backend-h86i.onrender.com/api/lands/${landId}/approve`, {
+      const response = await fetch(`http://localhost:5000/api/lands/${landId}/approve`, {
         method: "PATCH",
       });
 

@@ -31,7 +31,7 @@ const LandDetails = () => {
 
       // Step 1: Save transaction in backend
       // const res = await fetch("http://localhost:5000/api/transactions", {
-      const res = await fetch("https://land-registry-backend-h86i.onrender.com/api/transactions", {
+      const res = await fetch("http://localhost:5000/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -49,7 +49,7 @@ const LandDetails = () => {
       // Step 2: Finalize transaction
       if (res.ok) {
         // const finalizeRes = await fetch("http://localhost:5000/api/transactions/finalize", {
-        const finalizeRes = await fetch("https://land-registry-backend-h86i.onrender.com/api/transactions/finalize", {
+        const finalizeRes = await fetch("http://localhost:5000/api/transactions/finalize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -88,7 +88,7 @@ const LandDetails = () => {
           </CardHeader>
           <CardContent>
             <img
-              src={land.images[0] || "https://via.placeholder.com/300x200"}
+              src={land.images[0] || "http://via.placeholder.com/300x200"}
               alt={land.title}
               className="w-full h-64 object-cover mb-6 rounded"
             />

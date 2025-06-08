@@ -5,7 +5,8 @@ const User = require('../models/User');
 // POST /api/register
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, confirmPassword } = req.body;
+        const { email, password, confirmPassword, fullName } = req.body;
+
 
         if (!email || !password || !confirmPassword)
             return res.status(400).json({ error: 'Please fill all fields' });
@@ -20,6 +21,7 @@ router.post('/register', async (req, res) => {
         const newUser = new User({
             email,
             password,
+            fullName,
             isApproved: false
         });
 
@@ -53,9 +55,9 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'User credentials do not match, try again' });
         }
 
-        if (!user.isApproved) {
-            return res.status(403).json({ error: 'User not approved by admin yet' });
-        }
+        // if (!user.isApproved) {
+        //     return res.status(403).json({ error: 'User not approved by admin yet' });
+        // }
 
         res.status(200).json({
             message: 'Login successful',

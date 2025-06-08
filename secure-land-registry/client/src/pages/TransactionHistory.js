@@ -12,7 +12,7 @@ const TransactionHistory = () => {
     const fetchTransactions = async () => {
       try {
         // const res = await fetch(`http://localhost:5000/api/transactions/user/${userId}`);
-        const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/transactions/user/${userId}`);
+        const res = await fetch(`http://localhost:5000/api/transactions/user/${userId}`);
         const data = await res.json();
         setTransactions(data);
       } catch (err) {

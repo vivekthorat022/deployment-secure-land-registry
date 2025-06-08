@@ -20,7 +20,7 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const res = await fetch("https://land-registry-backend-h86i.onrender.com/api/login", {
+      const res = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -33,8 +33,9 @@ const LoginPage = () => {
         return;
       }
 
-      // Success
-      localStorage.setItem("userId", data.userId);
+      // ✅ Save full userInfo object with _id
+      localStorage.setItem("userInfo", JSON.stringify({ _id: data.userId }));
+
       alert("✅ Login successful");
       navigate("/profile");
 

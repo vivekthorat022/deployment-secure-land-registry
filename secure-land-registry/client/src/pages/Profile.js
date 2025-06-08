@@ -4,19 +4,22 @@ import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Layout from "../components/Layout";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { walletAddress } = useContext(WalletContext);
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
+  const navigate = useNavigate();
 
-  const userId = localStorage.getItem("userId");
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const userId = userInfo?._id;
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/profile/${userId}`);
+        const res = await fetch(`http://localhost:5000/api/profile/${userId}`);
         const data = await res.json();
         setUser(data);
         setFormData(data);
@@ -36,7 +39,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/profile/${userId}`, {
+      const res = await fetch(`http://localhost:5000/api/profile/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -57,26 +60,60 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userId");
+    localStorage.removeItem("userInfo");
     window.location.href = "/login";
+  };
+
+  const handleGoToChats = () => {
+    navigate("/chats");
   };
 
   return (
     <Layout>
       <div className="min-h-[90vh] bg-gray-100 flex items-center justify-center p-6">
-        <Card className="w-full max-w-xl">
+        <Card className="w-full max-w-xl relative">
+          {/* Chat Icon Button */}
+          {/* <button
+            className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+            onClick={handleGoToChats}
+            title="Manage Chats"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5 text-gray-800"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 8h10M7 12h6m-6 4h8m5-10a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </button> */}
+
+          {/* Modified button :  */}
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-4 right-4"
+            onClick={() => window.location.href = "/chat-list"}
+          >
+            💬
+          </Button>
+
+
           <CardHeader>
             <CardTitle className="text-2xl">👤 User Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-gray-700">
             {user ? (
               <>
-                <div>
-                  <strong>Name:</strong> {user.fullName}
-                </div>
-                <div>
-                  <strong>Email:</strong> {user.email}
-                </div>
+                <div><strong>Name:</strong> {user.fullName}</div>
+                <div><strong>Email:</strong> {user.email}</div>
                 <div>
                   <strong>Approval Status:</strong>{" "}
                   {user.isApproved ? (

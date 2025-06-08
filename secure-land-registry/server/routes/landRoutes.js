@@ -69,7 +69,7 @@ router.post('/', async (req, res) => {
 // =========================
 router.get('/', async (req, res) => {
   try {
-    const lands = await Land.find({ isApproved: true });
+    const lands = await Land.find({ isApproved: true }).populate("user");
     res.status(200).json(lands);
   } catch (err) {
     console.error(err);
@@ -80,7 +80,7 @@ router.get('/', async (req, res) => {
 // GET /api/lands/approved
 router.get('/approved', async (req, res) => {
   try {
-    const approvedLands = await Land.find({ isApproved: true });
+    const approvedLands = await Land.find({ isApproved: true }).populate("user");
     res.status(200).json(approvedLands);
   } catch (err) {
     console.error(err);
@@ -95,7 +95,7 @@ router.get('/approved', async (req, res) => {
 // =========================
 router.get('/:id', async (req, res) => {
   try {
-    const land = await Land.findById(req.params.id);
+    const land = await Land.findById(req.params.id).populate("user");
     if (!land) return res.status(404).json({ error: "❌ Land not found" });
     res.status(200).json(land);
   } catch (err) {

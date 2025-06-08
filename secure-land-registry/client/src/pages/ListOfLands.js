@@ -23,22 +23,33 @@ const ListOfLands = () => {
   const [loading, setLoading] = useState(false);
   const [selectedLand, setSelectedLand] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(9); // Pagination state
+  const [visibleCount, setVisibleCount] = useState(9);
 
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
+  const userInfoRaw = localStorage.getItem("userInfo");
+  const userId = userInfoRaw ? JSON.parse(userInfoRaw)?._id : null;
 
   const fetchLands = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands/approved");
+      const res = await fetch("http://localhost:5000/api/lands/approved");
       const data = await res.json();
       console.log("Fetched lands:", data);
-      setLands(data);
-      setFilteredLands(data);
+
+      if (Array.isArray(data)) {
+        setLands(data);
+        setFilteredLands(data);
+      } else {
+        setLands([]);
+        setFilteredLands([]);
+        console.error("Expected array, got:", data);
+        toast.error("❌ Unexpected response from server");
+      }
     } catch (err) {
       console.error("Error fetching lands:", err);
       toast.error("❌ Failed to load land listings");
+      setLands([]);
+      setFilteredLands([]);
     }
     setLoading(false);
   };
@@ -75,12 +86,11 @@ const ListOfLands = () => {
     }
 
     setFilteredLands(result);
-    setVisibleCount(9); // Reset pagination on filter change
+    setVisibleCount(9);
   };
 
   useEffect(() => {
     applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const handleChange = (e) => {
@@ -105,14 +115,14 @@ const ListOfLands = () => {
     }
 
     const currentUserId = String(userId).trim();
-    const landUserId = String(selectedLand.user).trim();
+    const landUserId = String(selectedLand.user._id).trim();
 
     if (currentUserId === landUserId) {
       toast.error("⚠️ You already own this land listing.");
       setIsModalOpen(false);
     } else {
       setIsModalOpen(false);
-      navigate(`/chat?receiverId=${selectedLand.user}`);
+      navigate(`/chat?receiverId=${selectedLand.user._id}`);
     }
   };
 
@@ -172,24 +182,23 @@ const ListOfLands = () => {
           </div>
         </div>
 
-        {/* Loading or Result */}
         {loading ? (
           <div className="text-center text-gray-600">🔄 Loading listings...</div>
-        ) : filteredLands.length === 0 ? (
+        ) : Array.isArray(filteredLands) && filteredLands.length === 0 ? (
           <div className="text-center text-red-500 font-medium mt-6">❌ No lands found matching your filters.</div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {filteredLands.slice(0, visibleCount).map((land) => (
                 <Card key={land._id} className="relative bg-white shadow-md hover:shadow-xl transition-shadow border border-gray-200 rounded-lg overflow-hidden">
-                  {land.user === userId && (
+                  {land.user && land.user._id === userId && (
                     <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
                       Your Listing
                     </span>
                   )}
                   <CardHeader className="p-0">
                     <img
-                      src={(land.images && land.images[0]) || "https://placehold.co/300x200?text=No+Image"}
+                      src={(land.images && land.images[0]) || "http://placehold.co/300x200?text=No+Image"}
                       alt={land.title}
                       className="w-full h-48 object-cover"
                     />
@@ -207,7 +216,6 @@ const ListOfLands = () => {
               ))}
             </div>
 
-            {/* Load More Button */}
             {visibleCount < filteredLands.length && (
               <div className="flex justify-center mt-8">
                 <Button onClick={handleLoadMore}>Load More</Button>
@@ -217,7 +225,6 @@ const ListOfLands = () => {
         )}
       </div>
 
-      {/* Modal */}
       <LandDetailsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -229,3 +236,4 @@ const ListOfLands = () => {
 };
 
 export default ListOfLands;
+  

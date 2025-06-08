@@ -1,29 +1,31 @@
-const Message = require("../models/Message");
+const mongoose = require("mongoose");
 
 const setupSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("🟢 New socket connected:", socket.id);
 
+    // Join a specific chat room
     socket.on("join-room", ({ landId, userId, otherUserId }) => {
-      const roomId = `${landId}_${userId}_${otherUserId}`;
+      const sortedIds = [userId, otherUserId].sort();
+      const roomId = `${landId}_${sortedIds[0]}_${sortedIds[1]}`;
       socket.join(roomId);
       console.log(`📦 User ${userId} joined room ${roomId}`);
     });
 
-    socket.on("send-message", async (data) => {
-      const { landId, senderId, receiverId, message } = data;
-      const roomId = `${landId}_${senderId}_${receiverId}`;
+    // Broadcast-only send-message handler
+    socket.on("send-message", (data) => {
+      const { landId, senderId, receiverId } = data;
 
-      const newMessage = new Message({
-        landId,
-        senderId,
-        receiverId,
-        message,
-      });
+      if (!landId || !senderId || !receiverId) {
+        console.warn("⚠️ Missing required fields in socket message:", data);
+        return socket.emit("message-error", { error: "Invalid message broadcast" });
+      }
 
-      await newMessage.save();
+      const sortedIds = [senderId, receiverId].sort();
+      const roomId = `${landId}_${sortedIds[0]}_${sortedIds[1]}`;
 
-      io.to(roomId).emit("receive-message", newMessage);
+      console.log(`📡 Broadcasting message to room ${roomId}:`, data);
+      io.to(roomId).emit("receive-message", data);
     });
 
     socket.on("disconnect", () => {

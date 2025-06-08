@@ -12,6 +12,7 @@ import TransactionHistory from "./pages/TransactionHistory";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import TestTransactionPage from "./pages/TestTransactionPage";
+import ChatListPage from "./pages/ChatListPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/test-transaction" element={<TestTransactionPage />} />
+        <Route path="/chat-list" element={<ChatListPage />} />
 
         {/* ✅ WILDCARD MUST BE LAST */}
         <Route path="*" element={<Navigate to="/login" replace />} />

@@ -15,7 +15,7 @@ const LandInquiryPage = () => {
     const fetchLand = async () => {
       try {
         // const res = await fetch(`http://localhost:5000/api/lands/${id}`);
-        const res = await fetch(`https://land-registry-backend-h86i.onrender.com/api/lands/${id}`);
+        const res = await fetch(`http://localhost:5000/api/lands/${id}`);
         const data = await res.json();
         setLand(data);
       } catch (err) {
@@ -40,7 +40,7 @@ const LandInquiryPage = () => {
         <Card className="w-full max-w-4xl mb-8">
           <CardHeader>
             <img
-              src={land.images[0] || "https://via.placeholder.com/600x300"}
+              src={land.images[0] || "http://via.placeholder.com/600x300"}
               alt={land.title}
               className="w-full h-64 object-cover rounded"
             />

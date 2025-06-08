@@ -75,7 +75,7 @@ const ListYourLand = () => {
     try {
       const base64Images = await convertImagesToBase64(imageFiles);
 
-      const response = await fetch("https://land-registry-backend-h86i.onrender.com/api/lands", {
+      const response = await fetch("http://localhost:5000/api/lands", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

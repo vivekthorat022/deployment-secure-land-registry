@@ -5,6 +5,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
+import { toast } from "react-hot-toast";
 
 const ChatPage = () => {
   const location = useLocation();
@@ -15,44 +16,76 @@ const ChatPage = () => {
 
   const fetchUserFromLocalStorage = () => {
     const storedUser = localStorage.getItem("userInfo");
-    if (storedUser) {
-      return JSON.parse(storedUser);
-    }
-    return null;
+    if (!storedUser) return null;
+    return JSON.parse(storedUser);
   };
 
   useEffect(() => {
     const currentUser = fetchUserFromLocalStorage();
-    if (!currentUser) return;
+    if (!currentUser) {
+      toast.error("User not logged in");
+      return;
+    }
     setUser(currentUser);
 
-    // Join chat room
+    console.log("🔍 ChatPage params:", { landId, sellerId, sellerName, userId: currentUser._id });
+
+    if (!sellerId || !sellerName) {
+      console.error("❌ Seller info missing");
+      toast.error("Seller info unavailable");
+    }
+
     socket.emit("join-room", {
       landId,
       userId: currentUser._id,
-      otherUserId: sellerId,
+      otherUserId: sellerId || "unknown",
     });
 
-    // Load previous messages
-    axios
-      .get(
-        `https://land-registry-backend-h86i.onrender.com/api/messages/${landId}/${sellerId}?currentUserId=${currentUser._id}`
-      )
-      .then((res) => setMessages(res.data))
-      .catch((err) => console.error("Error loading messages:", err));
+    socket.on("connect", () => {
+      console.log("🔗 Socket.IO connected:", socket.id);
+    });
+    socket.on("connect_error", (err) => {
+      console.error("❌ Socket.IO error:", err.message);
+      toast.error("Socket connection failed");
+    });
 
-    // Listen for incoming messages
+    if (sellerId && landId) {
+      axios
+        .get(`http://localhost:5000/api/messages/${landId}/${sellerId}?currentUserId=${currentUser._id}`)
+        .then((res) => {
+          console.log("💬 Loaded messages:", res.data);
+          setMessages(res.data);
+        })
+        .catch((err) => {
+          console.error("❌ Error loading messages:", err);
+          toast.error("Failed to load chat history");
+        });
+    }
+
     socket.on("receive-message", (msg) => {
+      console.log("💬 Real-time message received:", msg);
       setMessages((prev) => [...prev, msg]);
     });
 
+    socket.on("message-error", ({ error }) => {
+      console.error("❌ Socket message error:", error);
+      toast.error(error);
+    });
+
     return () => {
+      socket.off("connect");
+      socket.off("connect_error");
       socket.off("receive-message");
+      socket.off("message-error");
     };
   }, [landId, sellerId]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim()) return;
+    if (!sellerId) {
+      toast.error("Seller ID missing");
+      return;
+    }
 
     const newMessage = {
       landId,
@@ -61,26 +94,36 @@ const ChatPage = () => {
       message,
     };
 
-    socket.emit("send-message", newMessage);
-    setMessages((prev) => [...prev, newMessage]);
-    setMessage("");
+    try {
+    const response = await fetch("http://localhost:5000/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMessage),
+      });
+
+      const savedMessage = await response.json();
+
+      if (!response.ok) throw new Error(savedMessage.error || "Unknown error");
+
+      // setMessages((prev) => [...prev, savedMessage]); // Show locally
+      socket.emit("send-message", savedMessage); // Broadcast to others
+      setMessage("");
+    } catch (err) {
+      console.error("❌ Message send failed:", err.message);
+      toast.error("Failed to send message");
+    }
   };
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto mt-6 h-[80vh] flex flex-col border rounded-xl shadow-lg bg-gray-50">
-        {/* Header */}
         <div className="p-4 border-b flex justify-between items-center bg-white rounded-t-xl">
           <h2 className="text-lg font-semibold text-gray-800">
-            Chat with {sellerName || "Seller"}
+            Chat with {sellerName || "Unknown Seller"}
           </h2>
           <Button>Buy Now</Button>
         </div>
-
-        {/* Chat messages */}
         <ChatWindow messages={messages} currentUserId={user?._id} />
-
-        {/* Input area */}
         <div className="p-4 border-t flex items-center bg-white rounded-b-xl">
           <input
             type="text"
