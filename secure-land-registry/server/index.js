@@ -5,6 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const setupSocket = require('./socket');
 const chatRoutes = require('./routes/chatRoutes');
+const transactionInitiationRoutes = require("./routes/transactionInitiationRoutes");
 require('dotenv').config();
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api', require('./routes/authRoutes'));
 app.use('/api/lands', require('./routes/landRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
+app.use("/api/transaction-initiations", transactionInitiationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Secure Land Registry Backend is Running!");

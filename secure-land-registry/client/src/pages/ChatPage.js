@@ -45,7 +45,6 @@ const ChatPage = () => {
         });
     }
 
-
     // Modification ends
 
     console.log("🔍 ChatPage params:", { landId, sellerId, sellerName, userId: currentUser._id });
@@ -141,13 +140,9 @@ const ChatPage = () => {
           <h2 className="text-lg font-semibold text-gray-800">
             Chat with {sellerName || "Unknown Seller"}
           </h2>
-          {/* Old button */}
-          {/* <Button>Initiate Transaction</Button> */}
-
-          {/* Modified Button start */}
 
           <Button
-            onClick={() => {
+            onClick={async () => {
               if (!user || !landId || !landOwnerId) return toast.error("Missing required info");
 
               if (String(user._id) !== String(landOwnerId)) {
@@ -155,21 +150,42 @@ const ChatPage = () => {
                 return;
               }
 
-              console.log("✅ Seller initiating transaction...");
-
-              socket.emit("initiate-transaction", {
+              // Log the values before API call
+              console.log("📦 Initiate Transaction Payload:", {
                 landId,
                 sellerId: user._id,
-                buyerId: location.state?.buyerId || "", // adjust later if needed
+                buyerId: location.state?.buyerId,
               });
+
+              try {
+                const res = await fetch("http://localhost:5000/api/transaction-initiations/initiate", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    landId,
+                    sellerId: user._id,
+                    buyerId: location.state?.buyerId || "",
+                  }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || "Unknown error");
+
+                toast.success("Transaction initiated successfully");
+
+                // Update messages list with new system message
+                setMessages((prev) => [...prev, data.systemMessage]);
+              } catch (err) {
+                console.error("❌ Transaction initiation failed:", err);
+                toast.error("Failed to initiate transaction");
+              }
             }}
           >
             Initiate Transaction
           </Button>
-
-          {/* Modified Button end */}
-
         </div>
+
         <ChatWindow messages={messages} currentUserId={user?._id} />
         <div className="p-4 border-t flex items-center bg-white rounded-b-xl">
           <input

@@ -39,6 +39,8 @@ const setupSocket = (io) => {
 
     socket.on("initiate-transaction", async ({ landId, sellerId, buyerId }) => {
       try {
+        console.log("📥 initiate-transaction received with:", { landId, sellerId, buyerId });
+        
         // 1. Save the transaction initiation flag
         await TransactionInitiation.create({ landId, sellerId, buyerId });
 
@@ -53,7 +55,16 @@ const setupSocket = (io) => {
         });
 
         // 3. Broadcast to both users
-        io.emit("receive-message", systemMessage);
+        // io.emit("receive-message", systemMessage);
+
+        // 3. Broadcast to the correct room
+        const sortedIds = [sellerId, buyerId].sort();
+        const roomId = `${landId}_${sortedIds[0]}_${sortedIds[1]}`;
+
+        console.log(`📡 Broadcasting system message to room ${roomId}`);
+        io.to(roomId).emit("receive-message", systemMessage);
+
+
       } catch (err) {
         console.error("❌ Error initiating transaction:", err);
         socket.emit("message-error", { error: "Failed to initiate transaction" });
