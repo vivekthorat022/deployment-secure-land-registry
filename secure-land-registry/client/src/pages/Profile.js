@@ -28,9 +28,7 @@ const Profile = () => {
       }
     };
 
-    if (userId) {
-      fetchUserInfo();
-    }
+    if (userId) fetchUserInfo();
   }, [userId]);
 
   const handleChange = (e) => {
@@ -64,52 +62,25 @@ const Profile = () => {
     window.location.href = "/login";
   };
 
-  const handleGoToChats = () => {
-    navigate("/chats");
-  };
-
   return (
     <Layout>
       <div className="min-h-[90vh] bg-gray-100 flex items-center justify-center p-6">
-        <Card className="w-full max-w-xl relative">
-          {/* Chat Icon Button */}
-          {/* <button
-            className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-            onClick={handleGoToChats}
-            title="Manage Chats"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5 text-gray-800"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7 8h10M7 12h6m-6 4h8m5-10a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </button> */}
-
-          {/* Modified button :  */}
-
+        <Card className="w-full max-w-xl relative shadow-lg border border-gray-200">
+          {/* Chat Navigation Button */}
           <Button
             variant="outline"
-            size="icon"
-            className="absolute top-4 right-4"
+            size="sm"
+            className="absolute p-5 top-5 right-5 text-base bg-blue-200"
             onClick={() => window.location.href = "/chat-list"}
           >
-            💬
+            💬 Chats
           </Button>
 
-
           <CardHeader>
-            <CardTitle className="text-2xl">👤 User Profile</CardTitle>
+            <CardTitle className="text-2xl text-blue-700 font-bold">👤 User Profile</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-gray-700">
+
+          <CardContent className="space-y-4 text-[15px] text-gray-800">
             {user ? (
               <>
                 <div><strong>Name:</strong> {user.fullName}</div>
@@ -124,44 +95,48 @@ const Profile = () => {
                 </div>
 
                 {editMode ? (
-                  <>
+                  <div className="space-y-3 pt-3">
                     <div>
-                      <label>Phone:</label>
+                      <label className="block mb-1 text-sm">Phone</label>
                       <Input name="phone" value={formData.phone || ""} onChange={handleChange} />
                     </div>
                     <div>
-                      <label>Wallet Address:</label>
+                      <label className="block mb-1 text-sm">Wallet Address</label>
                       <Input name="walletAddress" value={formData.walletAddress || ""} onChange={handleChange} />
                     </div>
                     <div>
-                      <label>State:</label>
+                      <label className="block mb-1 text-sm">State</label>
                       <Input name="state" value={formData.state || ""} onChange={handleChange} />
                     </div>
                     <div>
-                      <label>City:</label>
+                      <label className="block mb-1 text-sm">City</label>
                       <Input name="city" value={formData.city || ""} onChange={handleChange} />
                     </div>
                     <div>
-                      <label>Pincode:</label>
+                      <label className="block mb-1 text-sm">Pincode</label>
                       <Input name="pincode" value={formData.pincode || ""} onChange={handleChange} />
                     </div>
-                    <div className="flex gap-4 mt-4">
+
+                    <div className="flex gap-4 pt-4">
                       <Button onClick={handleSave}>💾 Save</Button>
                       <Button variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div className="space-y-2 pt-2">
                     <div><strong>Phone:</strong> {user.phone || "-"}</div>
                     <div><strong>Wallet:</strong> {user.walletAddress || "-"}</div>
                     <div><strong>State:</strong> {user.state || "-"}</div>
                     <div><strong>City:</strong> {user.city || "-"}</div>
                     <div><strong>Pincode:</strong> {user.pincode || "-"}</div>
                     <Button className="mt-4" onClick={() => setEditMode(true)}>✏️ Edit Profile</Button>
-                  </>
+                  </div>
                 )}
 
-                <Button className="w-full mt-4 bg-red-500 hover:bg-red-600" onClick={handleLogout}>
+                <Button
+                  className="w-full mt-6 bg-red-500 hover:bg-red-600 text-white"
+                  onClick={handleLogout}
+                >
                   🚪 Logout
                 </Button>
               </>

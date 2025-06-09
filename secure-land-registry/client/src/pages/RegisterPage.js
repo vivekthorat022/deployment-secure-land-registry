@@ -50,38 +50,77 @@ const RegisterPage = () => {
 
   return (
     <Layout>
-      <div className="min-h-[90vh] flex items-center justify-center bg-gray-100 p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 px-4">
+        <Card className="w-full max-w-md shadow-xl border border-gray-200">
           <CardHeader>
-            <CardTitle className="text-xl">📝 Register a new account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-blue-700">Register</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <Label>Full Name</Label>
-                <Input name="fullName" value={form.fullName} onChange={handleChange} required />
+                <Input
+                  name="fullName"
+                  value={form.fullName}
+                  onChange={handleChange}
+                  required
+                  placeholder="John Doe"
+                />
               </div>
               <div>
                 <Label>Email</Label>
-                <Input name="email" type="email" value={form.email} onChange={handleChange} required />
+                <Input
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="you@example.com"
+                />
               </div>
               <div>
                 <Label>Phone</Label>
-                <Input name="phone" value={form.phone} onChange={handleChange} required />
+                <Input
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  required
+                  placeholder="9876543210"
+                />
               </div>
               <div>
                 <Label>Password</Label>
-                <Input name="password" type="password" value={form.password} onChange={handleChange} required />
+                <Input
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                />
               </div>
               <div>
                 <Label>Confirm Password</Label>
-                <Input name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} required />
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                />
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <Button type="submit" className="w-full">Register</Button>
             </form>
-            <p className="text-sm mt-4">
-              Already have an account? <span className="text-blue-600 cursor-pointer" onClick={() => navigate("/login")}>Login</span>
+            <p className="text-sm mt-4 text-center">
+              Already have an account?{" "}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => navigate("/login")}
+              >
+                Log in here
+              </span>
             </p>
           </CardContent>
         </Card>

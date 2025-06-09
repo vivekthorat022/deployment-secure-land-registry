@@ -14,7 +14,7 @@ const LandDetails = () => {
 
   const handleBuyNow = async () => {
     if (!walletAddress || !web3 || !contract) {
-      toast.error("Wallet not connected or contract not loaded.");
+      toast.error("⚠️ Wallet not connected or contract not loaded.");
       return;
     }
 
@@ -26,11 +26,8 @@ const LandDetails = () => {
         .createTransaction(walletAddress, land.contactWallet)
         .send({ from: walletAddress, value: valueInWei });
 
-      const transactionHash = tx.transactionHash;
-      const blockHash = tx.blockHash;
+      const { transactionHash, blockHash } = tx;
 
-      // Step 1: Save transaction in backend
-      // const res = await fetch("http://localhost:5000/api/transactions", {
       const res = await fetch("http://localhost:5000/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,23 +37,21 @@ const LandDetails = () => {
           sellerId: land.user,
           agreedPrice: land.price,
           transactionHash,
-          blockHash
-        })
+          blockHash,
+        }),
       });
 
       const result = await res.json();
 
-      // Step 2: Finalize transaction
       if (res.ok) {
-        // const finalizeRes = await fetch("http://localhost:5000/api/transactions/finalize", {
         const finalizeRes = await fetch("http://localhost:5000/api/transactions/finalize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             transactionId: result.transactionId,
             transactionHash,
-            blockHash
-          })
+            blockHash,
+          }),
         });
 
         const finalizeResult = await finalizeRes.json();
@@ -65,12 +60,11 @@ const LandDetails = () => {
           toast.success("🎉 Land purchase successful!");
           navigate("/profile");
         } else {
-          toast.error("Finalize failed: " + finalizeResult.error);
+          toast.error("❌ Finalize failed: " + finalizeResult.error);
         }
       } else {
-        toast.error("Backend error: " + result.error);
+        toast.error("❌ Backend error: " + result.error);
       }
-
     } catch (err) {
       console.error(err);
       toast.error("❌ Transaction failed!");
@@ -81,29 +75,32 @@ const LandDetails = () => {
 
   return (
     <Layout>
-      <div className="min-h-[80vh] bg-gray-100 p-6 flex justify-center">
-        <Card className="max-w-3xl w-full">
+      <div className="min-h-[80vh] bg-gray-100 flex justify-center p-6">
+        <Card className="w-full max-w-3xl shadow-md">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-center">{land.title}</CardTitle>
+            <CardTitle className="text-3xl font-semibold text-center text-blue-800">{land.title}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4 text-gray-700">
             <img
-              src={land.images[0] || "http://via.placeholder.com/300x200"}
+              src={land.images[0] || "https://placehold.co/600x300?text=No+Image"}
               alt={land.title}
-              className="w-full h-64 object-cover mb-6 rounded"
+              className="w-full h-64 object-cover rounded-md"
             />
-            <p className="mb-2">{land.description}</p>
-            <p><strong>Type:</strong> {land.type}</p>
-            <p><strong>Location:</strong> {land.location.city}, {land.location.state}</p>
-            <p><strong>Size:</strong> {land.size} sq.ft</p>
-            <p><strong>Price:</strong> ₹{land.price}</p>
-            <p><strong>Seller Contact:</strong> {land.contactName} ({land.contactPhone})</p>
 
-            <div className="mt-6 flex gap-4">
+            <div className="space-y-1">
+              <p className="text-base"><strong>Description:</strong> {land.description}</p>
+              <p><strong>Type:</strong> {land.type}</p>
+              <p><strong>Location:</strong> {land.location.city}, {land.location.state}</p>
+              <p><strong>Size:</strong> {land.size} sq.ft</p>
+              <p><strong>Price:</strong> ₹{land.price.toLocaleString()}</p>
+              <p><strong>Seller Contact:</strong> {land.contactName} ({land.contactPhone})</p>
+            </div>
+
+            <div className="pt-4 flex justify-end gap-3 border-t mt-6">
               <Button onClick={handleBuyNow} disabled={loading}>
-                {loading ? "Processing..." : "Buy Now"}
+                {loading ? "Processing..." : "💰 Buy Now"}
               </Button>
-              <Button variant="outline" onClick={() => navigate("/")}>Back</Button>
+              <Button variant="outline" onClick={() => navigate("/")}>← Back</Button>
             </div>
           </CardContent>
         </Card>

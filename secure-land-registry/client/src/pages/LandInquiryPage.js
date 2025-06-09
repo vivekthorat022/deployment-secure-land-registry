@@ -14,12 +14,11 @@ const LandInquiryPage = () => {
   useEffect(() => {
     const fetchLand = async () => {
       try {
-        // const res = await fetch(`http://localhost:5000/api/lands/${id}`);
         const res = await fetch(`http://localhost:5000/api/lands/${id}`);
         const data = await res.json();
         setLand(data);
       } catch (err) {
-        console.error("Error fetching land details:", err);
+        console.error("❌ Error fetching land details:", err);
       }
     };
 
@@ -29,7 +28,7 @@ const LandInquiryPage = () => {
   const handleSendMessage = () => {
     alert("🔔 Inquiry sent: " + message);
     setMessage("");
-    // 🔜 Replace with actual chat API call in Step 5.9
+    // 🔜 Integrate actual chat backend in production
   };
 
   if (!land) return <p className="text-center mt-10 text-gray-700">Loading land details...</p>;
@@ -37,39 +36,42 @@ const LandInquiryPage = () => {
   return (
     <Layout>
       <div className="min-h-[80vh] bg-gray-100 p-6 flex flex-col items-center">
-        <Card className="w-full max-w-4xl mb-8">
-          <CardHeader>
+        {/* Land Info Card */}
+        <Card className="w-full max-w-4xl mb-8 shadow">
+          <CardHeader className="p-0">
             <img
-              src={land.images[0] || "http://via.placeholder.com/600x300"}
+              src={land.images[0] || "https://placehold.co/600x300?text=No+Image"}
               alt={land.title}
-              className="w-full h-64 object-cover rounded"
+              className="w-full h-64 object-cover rounded-t"
             />
           </CardHeader>
-          <CardContent>
-            <CardTitle className="text-2xl mb-2">{land.title}</CardTitle>
-            <p className="text-gray-700 mb-2">{land.description}</p>
-            <p>📍 Location: {land.location.city}, {land.location.state}</p>
-            <p>💰 Price: ₹{land.price}</p>
-            <p>📐 Size: {land.size} sq.ft</p>
-            <p>📞 Contact: {land.contactName} | {land.contactPhone}</p>
+          <CardContent className="p-6 text-gray-700 space-y-2">
+            <CardTitle className="text-3xl font-semibold text-blue-800">{land.title}</CardTitle>
+            <p>{land.description}</p>
+            <p><strong>📍 Location:</strong> {land.location.city}, {land.location.state}</p>
+            <p><strong>💰 Price:</strong> ₹{land.price.toLocaleString()}</p>
+            <p><strong>📐 Size:</strong> {land.size} sq.ft</p>
+            <p><strong>📞 Contact:</strong> {land.contactName} | {land.contactPhone}</p>
           </CardContent>
         </Card>
 
-        <Card className="w-full max-w-4xl">
-          <CardHeader>
-            <CardTitle>Send an Inquiry</CardTitle>
+        {/* Inquiry Card */}
+        <Card className="w-full max-w-4xl shadow">
+          <CardHeader className="p-6 pb-0">
+            <CardTitle className="text-xl font-semibold">📨 Send an Inquiry</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="message">Your Message</Label>
+          <CardContent className="p-6 pt-4">
+            <div className="space-y-3">
+              <Label htmlFor="message" className="text-base">Your Message</Label>
               <Input
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="I'm interested in your land listing..."
+                className="h-12 px-4 text-base"
               />
-              <Button className="mt-2" onClick={handleSendMessage}>
-                Send Inquiry
+              <Button className="mt-2 w-full sm:w-auto" onClick={handleSendMessage}>
+                📤 Send Inquiry
               </Button>
             </div>
           </CardContent>

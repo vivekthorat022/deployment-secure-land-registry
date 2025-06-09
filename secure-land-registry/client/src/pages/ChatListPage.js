@@ -22,22 +22,18 @@ const ChatListPage = () => {
       }
 
       try {
-        console.log("🔍 Fetching chats from:", `http://localhost:5000/api/chats/list/${userId}`);
         const res = await fetch(`http://localhost:5000/api/chats/list/${userId}`);
         if (!res.ok) {
           const errorData = await res.json();
-          console.error("❌ Server response:", JSON.stringify(errorData, null, 2));
-          throw new Error(`HTTP error! status: ${res.status}, message: ${errorData.message || 'Unknown error'}`);
+          throw new Error(errorData.message || `Error ${res.status}`);
         }
+
         const data = await res.json();
-
-        console.log("💬 Chat list response:", JSON.stringify(data, null, 2));
-
         if (Array.isArray(data)) {
           setChats(data);
         } else {
           console.error("❌ Expected array but got:", data);
-          toast.error(data.message || "Invalid chat list data");
+          toast.error("Invalid chat list format");
           setChats([]);
         }
       } catch (err) {
@@ -64,23 +60,23 @@ const ChatListPage = () => {
 
   return (
     <Layout>
-      <div className="min-h-[80vh] p-6 bg-gray-100">
-        <h1 className="text-2xl font-semibold mb-6">💬 Your Chats</h1>
+      <div className="min-h-[80vh] bg-gray-50 p-6">
+        <h1 className="text-3xl font-bold text-blue-700 mb-6">💬 Your Conversations</h1>
 
         {loading ? (
-          <p>Loading chat list...</p>
+          <p className="text-gray-600">🔄 Loading chat list...</p>
         ) : chats.length === 0 ? (
-          <p>No chat history found.</p>
+          <p className="text-gray-500 text-sm">You haven’t started any conversations yet.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {chats.map((chat, index) => (
               <div
                 key={index}
                 onClick={() => openChat(chat)}
-                className="cursor-pointer bg-white p-4 shadow-md rounded-md hover:shadow-lg transition"
+                className="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition cursor-pointer p-4 space-y-1"
               >
-                <div className="font-semibold text-lg">{chat.otherUserName || "Unknown User"}</div>
-                <div className="text-sm text-gray-600">Land: {chat.landTitle || "Untitled"}</div>
+                <div className="text-lg font-semibold text-gray-800">{chat.otherUserName || "Unknown User"}</div>
+                <div className="text-sm text-gray-500">Land: {chat.landTitle || "Untitled Land"}</div>
               </div>
             ))}
           </div>

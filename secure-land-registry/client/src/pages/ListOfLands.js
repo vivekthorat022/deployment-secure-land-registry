@@ -132,56 +132,61 @@ const ListOfLands = () => {
 
   return (
     <Layout>
-      <div className="min-h-[80vh] bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold mb-6 text-center">Browse and filter through our land listings</h1>
+      <div className="min-h-[80vh] bg-gray-50 p-6">
+        <h1 className="text-3xl font-bold mb-8 text-center text-blue-700">
+          Explore Verified Land Listings
+        </h1>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div>
-            <Label>Type</Label>
-            <select name="type" value={filters.type} onChange={handleChange} className="w-full h-10 border rounded px-3">
-              <option value="">All</option>
-              <option value="Residential">Residential</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Agricultural">Agricultural</option>
-              <option value="Industrial">Industrial</option>
-            </select>
-          </div>
-          <div>
-            <Label>Availability</Label>
-            <select name="availableFor" value={filters.availableFor} onChange={handleChange} className="w-full h-10 border rounded px-3">
-              <option value="">All</option>
-              <option value="Sale">Sale</option>
-              <option value="Lease">Lease</option>
-              <option value="Both">Both</option>
-            </select>
-          </div>
-          <div>
-            <Label>City</Label>
-            <Input name="city" value={filters.city} onChange={handleChange} placeholder="e.g., Pune" />
-          </div>
-          <div>
-            <Label>Pincode</Label>
-            <Input name="pincode" value={filters.pincode} onChange={handleChange} placeholder="e.g., 411001" />
-          </div>
-          <div>
-            <Label>Min Price (₹)</Label>
-            <Input name="priceMin" value={filters.priceMin} onChange={handleChange} type="number" />
-          </div>
-          <div>
-            <Label>Max Price (₹)</Label>
-            <Input name="priceMax" value={filters.priceMax} onChange={handleChange} type="number" />
-          </div>
-          <div className="md:col-span-2">
-            <Label>Sort By</Label>
-            <select name="sort" value={filters.sort} onChange={handleChange} className="w-full h-10 border rounded px-3">
-              <option value="">Default</option>
-              <option value="priceLowHigh">Price: Low to High</option>
-              <option value="priceHighLow">Price: High to Low</option>
-            </select>
+        <div className="bg-white shadow rounded-md p-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <Label>Type</Label>
+              <select name="type" value={filters.type} onChange={handleChange} className="w-full h-10 border rounded px-3">
+                <option value="">All</option>
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Agricultural">Agricultural</option>
+                <option value="Industrial">Industrial</option>
+              </select>
+            </div>
+            <div>
+              <Label>Availability</Label>
+              <select name="availableFor" value={filters.availableFor} onChange={handleChange} className="w-full h-10 border rounded px-3">
+                <option value="">All</option>
+                <option value="Sale">Sale</option>
+                <option value="Lease">Lease</option>
+                <option value="Both">Both</option>
+              </select>
+            </div>
+            <div>
+              <Label>City</Label>
+              <Input name="city" value={filters.city} onChange={handleChange} placeholder="e.g., Pune" />
+            </div>
+            <div>
+              <Label>Pincode</Label>
+              <Input name="pincode" value={filters.pincode} onChange={handleChange} placeholder="e.g., 411001" />
+            </div>
+            <div>
+              <Label>Min Price (₹)</Label>
+              <Input name="priceMin" value={filters.priceMin} onChange={handleChange} type="number" />
+            </div>
+            <div>
+              <Label>Max Price (₹)</Label>
+              <Input name="priceMax" value={filters.priceMax} onChange={handleChange} type="number" />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Sort By</Label>
+              <select name="sort" value={filters.sort} onChange={handleChange} className="w-full h-10 border rounded px-3">
+                <option value="">Default</option>
+                <option value="priceLowHigh">Price: Low to High</option>
+                <option value="priceHighLow">Price: High to Low</option>
+              </select>
+            </div>
           </div>
         </div>
 
+        {/* Land Cards */}
         {loading ? (
           <div className="text-center text-gray-600">🔄 Loading listings...</div>
         ) : Array.isArray(filteredLands) && filteredLands.length === 0 ? (
@@ -190,7 +195,7 @@ const ListOfLands = () => {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {filteredLands.slice(0, visibleCount).map((land) => (
-                <Card key={land._id} className="relative bg-white shadow-md hover:shadow-xl transition-shadow border border-gray-200 rounded-lg overflow-hidden">
+                <Card key={land._id} className="relative bg-white hover:shadow-xl transition-all duration-200 border border-gray-200 rounded-lg overflow-hidden">
                   {land.user && land.user._id === userId && (
                     <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full z-10">
                       Your Listing
@@ -204,10 +209,10 @@ const ListOfLands = () => {
                     />
                   </CardHeader>
                   <CardContent className="p-4">
-                    <CardTitle className="text-lg font-semibold mb-1">{land.title}</CardTitle>
+                    <CardTitle className="text-lg font-semibold mb-1 text-blue-800">{land.title}</CardTitle>
                     <p className="text-sm text-gray-600 mb-1">{land.description}</p>
                     <p className="text-sm text-gray-500 mb-1">📍 {land.location?.city}, {land.location?.state}</p>
-                    <p className="text-sm mb-3">💰 ₹{land.price} | 📀 {land.size} sq.ft | 📄 {land.type}</p>
+                    <p className="text-sm mb-3">💰 ₹{land.price} | 📐 {land.size} sq.ft | 🏷️ {land.type}</p>
                     <Button className="w-full" onClick={() => openModal(land)}>
                       View Details
                     </Button>
@@ -236,4 +241,3 @@ const ListOfLands = () => {
 };
 
 export default ListOfLands;
-  

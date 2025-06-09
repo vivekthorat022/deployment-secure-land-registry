@@ -31,9 +31,7 @@ const ListYourLand = () => {
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    if (!userId) {
-      toast.error("❌ User not logged in");
-    }
+    if (!userId) toast.error("❌ User not logged in");
   }, [userId]);
 
   const handleChange = (e) => {
@@ -43,12 +41,10 @@ const ListYourLand = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-
     if (imageFiles.length + files.length > MAX_IMAGES) {
       toast.error(`❌ You can only upload up to ${MAX_IMAGES} images.`);
       return;
     }
-
     setImageFiles((prev) => [...prev, ...files]);
   };
 
@@ -58,15 +54,14 @@ const ListYourLand = () => {
 
   const convertImagesToBase64 = async (files) => {
     const base64List = await Promise.all(
-      files.map(
-        (file) =>
-          new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (err) => reject(err);
-          })
-      )
+      files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (err) => reject(err);
+        });
+      })
     );
     return base64List;
   };
@@ -74,12 +69,9 @@ const ListYourLand = () => {
   const submitFinalListing = async () => {
     try {
       const base64Images = await convertImagesToBase64(imageFiles);
-
       const response = await fetch("http://localhost:5000/api/lands", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
           title: formData.title,
@@ -102,7 +94,6 @@ const ListYourLand = () => {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         toast.success("✅ Land listing submitted successfully!");
         setFormData({
@@ -116,7 +107,6 @@ const ListYourLand = () => {
           availableFor: "",
           price: "",
           size: "",
-          images: [],
           contactName: "",
           contactPhone: "",
           contactEmail: ""
@@ -134,13 +124,22 @@ const ListYourLand = () => {
 
   return (
     <Layout>
-      <div className="min-h-[90vh] bg-gray-100 p-6 flex items-center justify-center">
-        <Card className="w-full max-w-4xl p-4">
+      <div className="min-h-[90vh] bg-gray-50 p-6 flex items-center justify-center">
+        <Card className="w-full max-w-4xl shadow-lg border border-gray-200 p-4">
           <CardHeader>
-            <CardTitle className="text-2xl">📋 List Your Land</CardTitle>
+            <CardTitle className="text-3xl font-bold text-blue-700 text-center">
+              List Your Land
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={(e) => { e.preventDefault(); setIsPreviewOpen(true); }}>
+            <form
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsPreviewOpen(true);
+              }}
+            >
+              {/* Basic Info */}
               <div>
                 <Label>Title</Label>
                 <Input name="title" value={formData.title} onChange={handleChange} required />
@@ -165,6 +164,8 @@ const ListYourLand = () => {
                 <Label>Description</Label>
                 <Input name="description" value={formData.description} onChange={handleChange} required />
               </div>
+
+              {/* Location */}
               <div>
                 <Label>State</Label>
                 <Input name="state" value={formData.state} onChange={handleChange} required />
@@ -181,6 +182,8 @@ const ListYourLand = () => {
                 <Label>Pincode</Label>
                 <Input name="pincode" value={formData.pincode} onChange={handleChange} required />
               </div>
+
+              {/* Sale Details */}
               <div>
                 <Label>Available For</Label>
                 <select
@@ -197,31 +200,38 @@ const ListYourLand = () => {
                 </select>
               </div>
               <div>
-                <Label>Price (in ₹)</Label>
-                <Input name="price" value={formData.price} onChange={handleChange} type="number" required />
+                <Label>Price (₹)</Label>
+                <Input name="price" type="number" value={formData.price} onChange={handleChange} required />
               </div>
               <div>
                 <Label>Size (sq. ft)</Label>
-                <Input name="size" value={formData.size} onChange={handleChange} type="number" required />
+                <Input name="size" type="number" value={formData.size} onChange={handleChange} required />
               </div>
+
+              {/* Images */}
               <div className="md:col-span-2">
-                <Label>Upload Land Images (Max 5 - jpg, jpeg, png)</Label>
+                <Label>Upload Land Images (Max 5)</Label>
                 <Input type="file" accept="image/png, image/jpeg" multiple onChange={handleImageChange} />
                 <div className="mt-2 flex flex-wrap gap-2">
                   {imageFiles.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-200 px-3 py-1 rounded">
-                      <span className="text-sm truncate max-w-[120px]">{file.name}</span>
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs shadow"
+                    >
+                      <span className="truncate max-w-[120px]">{file.name}</span>
                       <button
                         type="button"
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-500 hover:text-red-700"
                         onClick={() => handleRemoveImage(index)}
                       >
-                        ✖
+                        ✕
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Contact */}
               <div>
                 <Label>Contact Name</Label>
                 <Input name="contactName" value={formData.contactName} onChange={handleChange} required />
@@ -232,16 +242,18 @@ const ListYourLand = () => {
               </div>
               <div>
                 <Label>Contact Email</Label>
-                <Input name="contactEmail" value={formData.contactEmail} onChange={handleChange} type="email" required />
+                <Input name="contactEmail" type="email" value={formData.contactEmail} onChange={handleChange} required />
               </div>
-              <div className="md:col-span-2 text-center mt-4">
-                <Button type="submit" className="w-full">🚀 Preview Listing</Button>
+
+              {/* Submit */}
+              <div className="md:col-span-2 mt-4">
+                <Button type="submit" className="w-full text-base py-2">🚀 Preview Listing</Button>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
-      {/* Preview Modal */}
+
       <PreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

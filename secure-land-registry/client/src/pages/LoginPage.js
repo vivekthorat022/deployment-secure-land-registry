@@ -33,9 +33,7 @@ const LoginPage = () => {
         return;
       }
 
-      // ✅ Save full userInfo object with _id
       localStorage.setItem("userInfo", JSON.stringify({ _id: data.userId }));
-
       alert("✅ Login successful");
       navigate("/profile");
 
@@ -47,26 +45,46 @@ const LoginPage = () => {
 
   return (
     <Layout>
-      <div className="min-h-[90vh] flex items-center justify-center bg-gray-100 p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100 px-4">
+        <Card className="w-full max-w-md shadow-xl border border-gray-200">
           <CardHeader>
-            <CardTitle className="text-xl">🔐 Login to your account</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-blue-700">Login</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label>Email</Label>
-                <Input name="email" type="email" value={form.email} onChange={handleChange} required />
+                <Input
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="you@example.com"
+                />
               </div>
               <div>
                 <Label>Password</Label>
-                <Input name="password" type="password" value={form.password} onChange={handleChange} required />
+                <Input
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                />
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <Button type="submit" className="w-full">Login</Button>
             </form>
-            <p className="text-sm mt-4">
-              Don’t have an account? <span className="text-blue-600 cursor-pointer" onClick={() => navigate("/register")}>Register</span>
+            <p className="text-sm mt-4 text-center">
+              Don’t have an account?{" "}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => navigate("/register")}
+              >
+                Register here
+              </span>
             </p>
           </CardContent>
         </Card>

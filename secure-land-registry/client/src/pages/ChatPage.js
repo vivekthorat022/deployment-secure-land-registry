@@ -10,7 +10,7 @@ import { getWeb3Instance } from "../lib/web3LandRegistry";
 
 const ChatPage = () => {
   const location = useLocation();
-  const { landId, sellerId, sellerName } = location.state || {};
+  const { landId, sellerId, sellerName, landTitle } = location.state || {};
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
@@ -202,6 +202,20 @@ const ChatPage = () => {
 
         toast.dismiss();
         toast.success("Payment successful via MetaMask!");
+
+        // Log transaction system message
+        await fetch("http://localhost:5000/api/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            landId,
+            senderId: user._id,
+            receiverId: sellerId,
+            message: `✅ Transaction of ${valueInEth} Sepolia ETH has been successfully completed.`,
+            type: "system",
+          }),
+        });
+
       } catch (err) {
         toast.dismiss();
         console.error("❌ MetaMask Error:", err);

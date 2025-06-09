@@ -6,12 +6,9 @@ const LandDetailsModal = (props) => {
   const { isOpen, onClose, land } = props;
   const navigate = useNavigate();
 
-  // Handle escape key press
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
+      if (e.key === "Escape" && isOpen) onClose();
     };
 
     if (isOpen) {
@@ -29,8 +26,6 @@ const LandDetailsModal = (props) => {
 
   const handleEnquire = () => {
     const userInfoRaw = localStorage.getItem("userInfo");
-    console.log("📦 Raw userInfo from localStorage:", userInfoRaw);
-
     if (!userInfoRaw || userInfoRaw === "undefined" || userInfoRaw === "null") {
       alert("Please log in first.");
       return;
@@ -39,19 +34,18 @@ const LandDetailsModal = (props) => {
     let currentUser;
     try {
       currentUser = JSON.parse(userInfoRaw);
-      console.log("✅ Parsed userInfo:", currentUser);
     } catch (err) {
       console.error("❌ Failed to parse userInfo:", err);
       alert("Corrupted session. Please log in again.");
       return;
     }
 
-    if (!currentUser || !currentUser._id) {
+    if (!currentUser?._id) {
       alert("Please log in first.");
       return;
     }
 
-    if (!land.user || !land.user._id) {
+    if (!land.user?._id) {
       alert("Seller information is unavailable.");
       return;
     }
@@ -61,8 +55,7 @@ const LandDetailsModal = (props) => {
       return;
     }
 
-    onClose(); // Close modal before navigating
-
+    onClose();
     navigate("/chat", {
       state: {
         landId: land._id,
@@ -73,17 +66,15 @@ const LandDetailsModal = (props) => {
   };
 
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    if (e.target === e.currentTarget) onClose();
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="relative bg-white rounded-lg max-w-3xl w-full mx-auto shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl max-w-3xl w-full mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -96,43 +87,43 @@ const LandDetailsModal = (props) => {
         </button>
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4 pr-8">{land.title}</h2>
+          <h2 className="text-3xl font-bold mb-6 text-blue-700">{land.title}</h2>
 
           {/* Images */}
-          <div className="flex flex-wrap gap-2 mb-4 overflow-x-auto">
+          <div className="flex flex-wrap gap-3 mb-6 overflow-x-auto">
             {Array.isArray(land.images) && land.images.length > 0 ? (
               land.images.map((img, idx) => (
                 <img
                   key={idx}
                   src={img || "https://placehold.co/300x200?text=No+Image"}
                   alt={`Land ${idx + 1}`}
-                  className="w-40 h-28 object-cover rounded border flex-shrink-0"
+                  className="w-40 h-28 object-cover rounded-md border flex-shrink-0 shadow-sm"
                 />
               ))
             ) : (
               <img
                 src="https://placehold.co/300x200?text=No+Image"
                 alt="No images available"
-                className="w-40 h-28 object-cover rounded border"
+                className="w-40 h-28 object-cover rounded-md border"
               />
             )}
           </div>
 
           {/* Land Info */}
-          <div className="space-y-2 text-sm text-gray-700 mb-6">
-            <div><span className="font-semibold">Description:</span> {land.description}</div>
-            <div><span className="font-semibold">Type:</span> {land.type}</div>
-            <div><span className="font-semibold">Size:</span> {land.size} sq.ft</div>
-            <div><span className="font-semibold">Price:</span> ₹{land.price?.toLocaleString()}</div>
-            <div><span className="font-semibold">Availability:</span> {land.availableFor}</div>
-            <div><span className="font-semibold">Location:</span> {land.location?.city}, {land.location?.district}, {land.location?.state} - {land.location?.pincode}</div>
-            <div><span className="font-semibold">Contact Name:</span> {land.contactName}</div>
-            <div><span className="font-semibold">Phone:</span> {land.contactPhone}</div>
-            <div><span className="font-semibold">Email:</span> {land.contactEmail}</div>
+          <div className="space-y-3 text-[15px] text-gray-800 mb-6">
+            <div><strong>Description:</strong> {land.description}</div>
+            <div><strong>Type:</strong> {land.type}</div>
+            <div><strong>Size:</strong> {land.size} sq.ft</div>
+            <div><strong>Price:</strong> ₹{land.price?.toLocaleString()}</div>
+            <div><strong>Availability:</strong> {land.availableFor}</div>
+            <div><strong>Location:</strong> {land.location?.city}, {land.location?.district}, {land.location?.state} - {land.location?.pincode}</div>
+            <div><strong>Contact Name:</strong> {land.contactName}</div>
+            <div><strong>Phone:</strong> {land.contactPhone}</div>
+            <div><strong>Email:</strong> {land.contactEmail}</div>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-4 pt-4 border-t mt-6">
             <Button variant="outline" onClick={onClose}>Close</Button>
             <Button onClick={handleEnquire}>Enquire</Button>
           </div>
